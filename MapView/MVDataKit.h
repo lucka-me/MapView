@@ -10,7 +10,8 @@ typedef enum _FeatureType {
 } FeatureType;
 
 typedef enum _FeatureID {
-    FID_RESIDENCE = 70002
+    FID_NONE = 0,
+    FID_RESIDENCE = 70002,
 } FeatureID;
 
 // MARK: Class
@@ -27,12 +28,17 @@ public:
     // 方法
     MapBound();
     ~MapBound() {};
-    CPoint convert(MFPoint point);
-    MFPoint convert(CPoint point);
+    void SetMap(double left, double buttom, double right, double top);
+    void SetDisplay(int left, int buttom, int right, int top);
+    CPoint ConvertToDisplay(MFPoint point);
+    CPoint ConvertToDisplay(double x, double y);
+    CPoint * ConvertToDisplay(FeatureArray & pointList);
+    MFPoint * ConvertToMap(CPoint point);    // 返回地图点的指针
+    MFPoint * ConvertToMap(int x, int y);    // 返回地图点的指针
 
     // 属性
-    double     mapLeft,     mapButtom,     mapRight,     mapTop;    // 数据的范围
-    double displayLeft, displayButtom, displayRight, displayTop;    // 显示的范围
+    double  mapLeft,     mapButtom,     mapRight,     mapTop;    // 数据的范围
+    int displayLeft, displayButtom, displayRight, displayTop;    // 显示的范围
 };
 
 class FeatureArray :
@@ -50,7 +56,7 @@ public:
     virtual ~MapFeature() {};
     virtual FeatureType GetType() { return FT_NONE; };
     virtual void Draw(CDC & dc, MapBound & bound, COLORREF color) {};
-    virtual bool DidSelected(unsigned short buffer = 2) { return false; };
+    virtual bool DidSelected(MFPoint & selectPoint, double buffer = 2) { return false; };
     
     // 属性
     FeatureID id;
@@ -59,12 +65,12 @@ public:
 class MFPoint :
     public MapFeature {
 public:
-    MFPoint();
+    MFPoint(double setX = 0.0, double setY = 0.0, FeatureID setId = FID_NONE);
     ~MFPoint() {};
     // 重写功能
     FeatureType GetType() { return FT_POINT; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
-    bool DidSelected(unsigned short buffer = 2);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 属性
     double x;
     double y;
@@ -73,15 +79,15 @@ public:
 class MFPolyline :
     public MapFeature {
 public:
-    MFPolyline();
+    MFPolyline(FeatureID setId = FID_NONE);
     ~MFPolyline() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
-    bool DidSelected(unsigned short buffer = 2);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
-    void Set(MFPoint startPoint);
-    void Append(MFPoint newPoint);
+    void Set(MFPoint * startPoint);
+    void Append(MFPoint * newPoint);
     // 属性
     FeatureArray pointList;
 };
@@ -89,15 +95,15 @@ public:
 class MFPolygon :
     public MapFeature {
 public:
-    MFPolygon();
+    MFPolygon(FeatureID setId = FID_NONE);
     ~MFPolygon() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
-    bool DidSelected(unsigned short buffer = 2);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
-    void Set(MFPoint startPoint);
-    void Append(MFPoint newPoint);
+    void Set(MFPoint * startPoint);
+    void Append(MFPoint * newPoint);
     // 属性
     FeatureArray pointList;
 };
