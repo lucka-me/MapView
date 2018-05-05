@@ -10,6 +10,7 @@
 #endif
 
 #include "MapViewDoc.h"
+#include "MainFrm.h"
 
 #include <propkey.h>
 
@@ -59,11 +60,15 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
 
     featureList.RemoveAll();
     featureList.Add(new MapFeature());  // 占位用，因为数据序号从1开始
-    CTypedPtrArray<CObArray, MFPoint *> controlPointList;// = CTypedPtrArray<CObArray, MFPoint *>();
+    CTypedPtrArray<CObArray, MFPoint *> controlPointList;
 
     int index, featureID;
     int blank;  // 用于处理无用输入
 
+    CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
+    pFrame->m_wndStatusBar.EnablePaneProgressBar(1, file.GetLength(), TRUE);
+    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    
     while (true) {
 
         file.ReadString(line);
@@ -126,7 +131,11 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 return FALSE;
             }
         }
+
+        pFrame->m_wndStatusBar.SetPaneProgress(1, file.GetPosition(), TRUE);
     }
+
+    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
 
     // 以控制点确定图幅
     double left, buttom, right, top;

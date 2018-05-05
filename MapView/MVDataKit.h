@@ -9,13 +9,6 @@ typedef enum _FeatureType {
     FT_POLYGON
 } FeatureType;
 
-/*
-typedef enum _FeatureID {
-    FID_NONE = 0,
-    FID_RESIDENCE = 70002,
-} FeatureID;
-*/
-
 // MARK: Class
 
 class MapBound;

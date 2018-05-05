@@ -63,6 +63,7 @@ void CMapViewView::OnDraw(CDC* pDC)
     if (pDoc->featureList.IsEmpty()) {
         return;
     }
+
     // 确定显示范围
     CRect displayRect;
     GetClientRect(&displayRect);
@@ -78,7 +79,6 @@ void CMapViewView::OnDraw(CDC* pDC)
     }
 
     // 双缓存
-    //	Reference: http://blog.csdn.net/tiaotiaoyly/article/details/2516235
     CDC memDC;
     CBitmap memBitmap;
     memDC.CreateCompatibleDC(NULL);

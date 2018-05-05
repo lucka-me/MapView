@@ -156,6 +156,8 @@ void MFPolygon::Add(MFPoint * newPoint) {
     pointList.Add(newPoint);
 }
 
+// MARK: MVDecoder
+
 void MVDecoder::Decode(CString line, int & a, int & b) {
     std::string str;
     std::stringstream ss;
