@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MVDataKit.h"
+#include <sstream>
 
 // MARK: MapBound
 
@@ -55,7 +56,7 @@ MFPoint * MapBound::ConvertToMap(int x, int y) {
 
 // MARK: MFPoint
 
-MFPoint::MFPoint(double setX, double setY, FeatureID setId) {
+MFPoint::MFPoint(double setX, double setY, int setId) {
     id = setId;
     x = setX;
     y = setY;
@@ -83,7 +84,7 @@ bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
 
 // MARK: MFPolyline
 
-MFPolyline::MFPolyline(FeatureID setId) {
+MFPolyline::MFPolyline(int setId) {
     id = setId;
 }
 
@@ -106,16 +107,16 @@ bool MFPolyline::DidSelected(MFPoint & selectPoint, double buffer) {
 
 void MFPolyline::Set(MFPoint * startPoint) {
     pointList.RemoveAll();
-    Append(startPoint);
+    Add(startPoint);
 }
 
-void MFPolyline::Append(MFPoint * newPoint) {
+void MFPolyline::Add(MFPoint * newPoint) {
     pointList.Add(newPoint);
 }
 
 // MARK: MFPolygon
 
-MFPolygon::MFPolygon(FeatureID setId) {
+MFPolygon::MFPolygon(int setId) {
     id = setId;
 }
 
@@ -140,9 +141,27 @@ bool MFPolygon::DidSelected(MFPoint & selectPoint, double buffer) {
 
 void MFPolygon::Set(MFPoint * startPoint) {
     pointList.RemoveAll();
-    Append(startPoint);
+    Add(startPoint);
 }
 
-void MFPolygon::Append(MFPoint * newPoint) {
+void MFPolygon::Add(MFPoint * newPoint) {
     pointList.Add(newPoint);
+}
+
+void MVDecoder::Decode(CString line, int & a, int & b) {
+    std::string str;
+    std::stringstream ss;
+    line.Replace(TEXT(","), TEXT(" "));
+    str = CT2A(line.GetBuffer());
+    ss << str;
+    ss >> a >> b;
+}
+
+void MVDecoder::Decode(CString line, double & a, double & b) {
+    std::string str;
+    std::stringstream ss;
+    line.Replace(TEXT(","), TEXT(" "));
+    str = CT2A(line.GetBuffer());
+    ss << str;
+    ss >> a >> b;
 }

@@ -9,10 +9,12 @@ typedef enum _FeatureType {
     FT_POLYGON
 } FeatureType;
 
+/*
 typedef enum _FeatureID {
     FID_NONE = 0,
     FID_RESIDENCE = 70002,
 } FeatureID;
+*/
 
 // MARK: Class
 
@@ -59,13 +61,13 @@ public:
     virtual bool DidSelected(MFPoint & selectPoint, double buffer = 2) { return false; };
     
     // 属性
-    FeatureID id;
+    int id;
 };
 
 class MFPoint :
     public MapFeature {
 public:
-    MFPoint(double setX = 0.0, double setY = 0.0, FeatureID setId = FID_NONE);
+    MFPoint(double setX = 0.0, double setY = 0.0, int setId = 0);
     ~MFPoint() {};
     // 重写功能
     FeatureType GetType() { return FT_POINT; };
@@ -79,7 +81,7 @@ public:
 class MFPolyline :
     public MapFeature {
 public:
-    MFPolyline(FeatureID setId = FID_NONE);
+    MFPolyline(int setId = 0);
     ~MFPolyline() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
@@ -87,7 +89,7 @@ public:
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
     void Set(MFPoint * startPoint);
-    void Append(MFPoint * newPoint);
+    void Add(MFPoint * newPoint);
     // 属性
     FeatureArray pointList;
 };
@@ -95,7 +97,7 @@ public:
 class MFPolygon :
     public MapFeature {
 public:
-    MFPolygon(FeatureID setId = FID_NONE);
+    MFPolygon(int setId = 0);
     ~MFPolygon() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
@@ -103,7 +105,14 @@ public:
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
     void Set(MFPoint * startPoint);
-    void Append(MFPoint * newPoint);
+    void Add(MFPoint * newPoint);
     // 属性
     FeatureArray pointList;
+};
+
+// 解码器
+class MVDecoder {
+public:
+    void Decode(CString line, int & a, int & b);
+    void Decode(CString line, double & a, double & b);
 };
