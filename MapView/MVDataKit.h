@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 // MARK: Enum
 
@@ -27,7 +27,7 @@ class MFPolygon;
 
 class MapBound {
 public:
-    // ·½·¨
+    // æ–¹æ³•
     MapBound();
     ~MapBound() {};
     void SetMap(double left, double buttom, double right, double top);
@@ -35,12 +35,12 @@ public:
     CPoint ConvertToDisplay(MFPoint point);
     CPoint ConvertToDisplay(double x, double y);
     CPoint * ConvertToDisplay(FeatureArray & pointList);
-    MFPoint * ConvertToMap(CPoint point);    // ·µ»ØµØÍ¼µãµÄÖ¸Õë
-    MFPoint * ConvertToMap(int x, int y);    // ·µ»ØµØÍ¼µãµÄÖ¸Õë
+    MFPoint * ConvertToMap(CPoint point);    // è¿”å›åœ°å›¾ç‚¹çš„æŒ‡é’ˆ
+    MFPoint * ConvertToMap(int x, int y);    // è¿”å›åœ°å›¾ç‚¹çš„æŒ‡é’ˆ
 
-    // ÊôĞÔ
-    double  mapLeft,     mapButtom,     mapRight,     mapTop;    // Êı¾İµÄ·¶Î§
-    int displayLeft, displayButtom, displayRight, displayTop;    // ÏÔÊ¾µÄ·¶Î§
+    // å±æ€§
+    double  mapLeft,     mapButtom,     mapRight,     mapTop;    // æ•°æ®çš„èŒƒå›´
+    int displayLeft, displayButtom, displayRight, displayTop;    // æ˜¾ç¤ºçš„èŒƒå›´
 };
 
 class FeatureArray :
@@ -53,14 +53,14 @@ public:
 class MapFeature :
     public CObject {
 public:
-    // ·½·¨
+    // æ–¹æ³•
     MapFeature() {};
     virtual ~MapFeature() {};
     virtual FeatureType GetType() { return FT_NONE; };
     virtual void Draw(CDC & dc, MapBound & bound, COLORREF color) {};
     virtual bool DidSelected(MFPoint & selectPoint, double buffer = 2) { return false; };
     
-    // ÊôĞÔ
+    // å±æ€§
     int id;
 };
 
@@ -69,11 +69,11 @@ class MFPoint :
 public:
     MFPoint(double setX = 0.0, double setY = 0.0, int setId = 0);
     ~MFPoint() {};
-    // ÖØĞ´¹¦ÄÜ
+    // é‡å†™åŠŸèƒ½
     FeatureType GetType() { return FT_POINT; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
-    // ÊôĞÔ
+    // å±æ€§
     double x;
     double y;
 };
@@ -83,14 +83,14 @@ class MFPolyline :
 public:
     MFPolyline(int setId = 0);
     ~MFPolyline() {};
-    // ÖØĞ´¹¦ÄÜ
+    // é‡å†™åŠŸèƒ½
     FeatureType GetType() { return FT_POLYLINE; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
-    // ĞÂ·½·¨
+    // æ–°æ–¹æ³•
     void Set(MFPoint * startPoint);
     void Add(MFPoint * newPoint);
-    // ÊôĞÔ
+    // å±æ€§
     FeatureArray pointList;
 };
 
@@ -99,18 +99,18 @@ class MFPolygon :
 public:
     MFPolygon(int setId = 0);
     ~MFPolygon() {};
-    // ÖØĞ´¹¦ÄÜ
+    // é‡å†™åŠŸèƒ½
     FeatureType GetType() { return FT_POLYLINE; };
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
-    // ĞÂ·½·¨
+    // æ–°æ–¹æ³•
     void Set(MFPoint * startPoint);
     void Add(MFPoint * newPoint);
-    // ÊôĞÔ
+    // å±æ€§
     FeatureArray pointList;
 };
 
-// ½âÂëÆ÷
+// è§£ç å™¨
 class MVDecoder {
 public:
     void Decode(CString line, int & a, int & b);
