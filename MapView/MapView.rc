@@ -21,6 +21,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -130,7 +131,7 @@ BEGIN
     END
     POPUP "数据处理(&D)"
     BEGIN
-        MENUITEM "建立索引",                        ID_32771
+        MENUITEM "建立索引",                        ID_BUILD_INDEX
     END
     POPUP "视图(&V)"
     BEGIN

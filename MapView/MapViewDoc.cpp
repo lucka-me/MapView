@@ -49,7 +49,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
     if (!CDocument::OnOpenDocument(lpszPathName))
         return FALSE;
 
-    // TODO:  在此添加您专用的创建代码
+    // 读取数据
     CStdioFile file;
     if (!file.Open(lpszPathName, CFile::modeRead | CFile::shareDenyNone | CFile::typeText))
         return FALSE;
@@ -59,9 +59,11 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
 
     featureList.RemoveAll();
     featureList.Add(new MapFeature());  // 占位用，因为数据序号从1开始
+    CTypedPtrArray<CObArray, MFPoint *> controlPointList;// = CTypedPtrArray<CObArray, MFPoint *>();
 
     int index, featureID;
     int blank;  // 用于处理无用输入
+
     while (true) {
 
         file.ReadString(line);
@@ -109,7 +111,9 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 double x, y;
                 file.ReadString(line);
                 decoder.Decode(line, x, y);
-                featureList.Add(new MFPoint(x, y, featureID));
+                MFPoint * point = new MFPoint(x, y, featureID);
+                featureList.Add(point);
+                controlPointList.Add(point);
                 file.ReadString(line);
                 break;
             }
@@ -123,8 +127,23 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
             }
         }
     }
+
+    // 以控制点确定图幅
+    double left, buttom, right, top;
+    buttom = controlPointList[0]->x;
+    top    = controlPointList[0]->x;
+    left   = controlPointList[0]->y;
+    right  = controlPointList[0]->y;
+    for (int i = 1; i < controlPointList.GetSize(); i++) {
+        buttom = controlPointList[i]->x < buttom ? controlPointList[i]->x : buttom;
+        top    = controlPointList[i]->x >    top ? controlPointList[i]->x :    top;
+        left   = controlPointList[i]->y <   left ? controlPointList[i]->x :   left;
+        right  = controlPointList[i]->y >  right ? controlPointList[i]->x :  right;
+    }
+    bound.SetMap(left, buttom, right, top);
+
     CString message;
-    message.Format(_T("读取成功，共读取%d条数据。"), featureList.GetSize() - 1);
+    message.Format(_T("数据读取成功，共%d条数据。"), featureList.GetSize() - 1);
     AfxMessageBox(message, MB_OK);
 
     return TRUE;

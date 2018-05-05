@@ -32,6 +32,8 @@ public:
     ~MapBound() {};
     void SetMap(double left, double buttom, double right, double top);
     void SetDisplay(int left, int buttom, int right, int top);
+    double MapWidth();
+    double MapHeight();
     CPoint ConvertToDisplay(MFPoint point);
     CPoint ConvertToDisplay(double x, double y);
     CPoint * ConvertToDisplay(FeatureArray & pointList);

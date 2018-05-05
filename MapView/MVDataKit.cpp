@@ -23,6 +23,14 @@ void MapBound::SetDisplay(int left, int buttom, int right, int top) {
     displayTop    = top;
 }
 
+double MapBound::MapWidth() {
+    return mapTop - mapButtom;
+}
+
+double MapBound::MapHeight() {
+    return mapRight - mapLeft;
+}
+
 CPoint MapBound::ConvertToDisplay(MFPoint point) {
     return ConvertToDisplay(point.x, point.y);
 }

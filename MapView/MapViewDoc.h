@@ -49,4 +49,5 @@ protected:
     // 属性
 public:
     FeatureArray featureList;
+    MapBound bound;
 };

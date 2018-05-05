@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMapViewView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+    ON_COMMAND(ID_BUILD_INDEX, &CMapViewView::OnBuildIndex)
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -52,14 +53,72 @@ BOOL CMapViewView::PreCreateWindow(CREATESTRUCT& cs)
 
 // CMapViewView 绘图
 
-void CMapViewView::OnDraw(CDC* /*pDC*/)
+void CMapViewView::OnDraw(CDC* pDC)
 {
 	CMapViewDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
 
-	// TODO: 在此处为本机数据添加绘制代码
+    if (pDoc->featureList.IsEmpty()) {
+        return;
+    }
+    // 确定显示范围
+    CRect displayRect;
+    GetClientRect(&displayRect);
+    // 对比纵横比
+    double displayRatio = double(displayRect.Height()) / displayRect.Width();
+    double mapRatio = pDoc->bound.MapHeight() / pDoc->bound.MapWidth();
+    if (displayRatio > mapRatio) {
+        int displayHeightHalf = int(displayRect.Width() * mapRatio / 2);
+        pDoc->bound.SetDisplay(0, displayRect.Height() / 2 + displayHeightHalf, displayRect.right, displayRect.Height() / 2 - displayHeightHalf);
+    } else {
+        int displayWidthHalf = int(displayRect.Height() / mapRatio / 2);
+        pDoc->bound.SetDisplay(displayRect.Width() / 2 - displayWidthHalf, displayRect.Height(), displayRect.Width() / 2 + displayWidthHalf, 0);
+    }
+
+    // 双缓存
+    //	Reference: http://blog.csdn.net/tiaotiaoyly/article/details/2516235
+    CDC memDC;
+    CBitmap memBitmap;
+    memDC.CreateCompatibleDC(NULL);
+    memBitmap.CreateCompatibleBitmap(pDC, displayRect.right, displayRect.bottom);
+    CBitmap *pOldBit = memDC.SelectObject(&memBitmap);
+    memDC.FillSolidRect(0, 0, displayRect.right, displayRect.bottom, RGB(255, 255, 255));
+
+    for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
+        COLORREF color;
+        switch (pDoc->featureList[i]->id) {
+            case 10000:
+            case 10001:
+            case 10003:
+            case 10004: {
+                color = RGB(255, 0, 0);
+                break;
+            }
+            case 20000:
+            case 20001:
+            case 20002:
+            case 20003:
+            case 20004: {
+                color = RGB(0, 255, 0);
+                break;
+            }
+            case 30000: {
+                color = RGB(0, 0, 255);
+                break;
+            }
+            default: {
+                color = RGB(255, 255, 255);
+                break;
+            }
+        }
+        pDoc->featureList[i]->Draw(memDC, pDoc->bound, color);
+    }
+
+    pDC->BitBlt(0, 0, displayRect.right, displayRect.bottom, &memDC, 0, 0, SRCCOPY);
+    memBitmap.DeleteObject();
+    memDC.DeleteDC();
 }
 
 
@@ -125,3 +184,7 @@ CMapViewDoc* CMapViewView::GetDocument() const // 非调试版本是内联的
 
 
 // CMapViewView 消息处理程序
+
+void CMapViewView::OnBuildIndex() {
+    // TODO: 在此添加命令处理程序代码
+}
