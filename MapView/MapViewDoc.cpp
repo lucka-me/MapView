@@ -65,9 +65,11 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
     int index, featureID;
     int blank;  // 用于处理无用输入
 
+    // 修改状态栏，添加进度条
     CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, file.GetLength(), TRUE);
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    pFrame->m_wndStatusBar.SetPaneText(0, _T("读取数据中"));
     
     while (true) {
 
@@ -135,7 +137,10 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
         pFrame->m_wndStatusBar.SetPaneProgress(1, file.GetPosition(), TRUE);
     }
 
+    // 仿射变换
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    pFrame->m_wndStatusBar.SetPaneText(0, _T("仿射变换处理中"));
+
 
     // 以控制点确定图幅
     double left, buttom, right, top;
@@ -151,9 +156,46 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
     }
     bound.SetMap(left, buttom, right, top);
 
+    // 建立索引
+    pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
+    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    pFrame->m_wndStatusBar.SetPaneText(0, _T("建立索引中"));
+
+    int gridResolution = 5; // 网格分辨率
+    int gridRow = int(bound.MapHeight() / gridResolution) + 1;
+    int gridCol = int(bound.MapHeight() / gridResolution) + 1;
+    // 动态建立二维数组
+    //   Reference: StackOverflow 936687
+    gridIndex = new FeatureArray * [gridRow];
+    for (int i = 0; i < gridRow; i++) {
+        gridIndex[i] = new FeatureArray[gridCol];
+    }
+    for (int i = 0; i < featureList.GetSize(); i++) {
+        switch (featureList[i]->GetType()) {
+            case FT_POINT: {
+                MFPoint * point = (MFPoint *)featureList[i];
+                int row = int((point->x - bound.mapButtom) / gridResolution);
+                int col = int((point->y - bound.mapLeft) / gridResolution);
+                gridIndex[row][col].Add(point);
+                break;
+            }
+            case FT_POLYLINE: {
+                MFPolyline * polyline = (MFPolyline *)featureList[i];
+                break;
+            }
+            case FT_POLYGON: {
+                MFPolygon * polygon = (MFPolygon *)featureList[i];
+                break;
+            }
+            default:
+                break;
+        }
+        pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
+    }
+    
     CString message;
-    message.Format(_T("数据读取成功，共%d条数据。"), featureList.GetSize() - 1);
-    AfxMessageBox(message, MB_OK);
+    message.Format(_T("共读取%d条数据。"), featureList.GetSize() - 1);
+    pFrame->m_wndStatusBar.SetPaneText(0, message);
 
     return TRUE;
 }

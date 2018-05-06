@@ -70,6 +70,9 @@ MFPoint::MFPoint(double setX, double setY, int setId) {
     y = setY;
 }
 
+void MFPoint::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
+}
+
 void MFPoint::Draw(CDC & dc, MapBound & bound, COLORREF color) {
     CPoint displayPoint = bound.ConvertToDisplay(x, y);
     CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
@@ -94,6 +97,9 @@ bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
 
 MFPolyline::MFPolyline(int setId) {
     id = setId;
+}
+
+void MFPolyline::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
 }
 
 void MFPolyline::Draw(CDC & dc, MapBound & bound, COLORREF color) {
@@ -126,6 +132,9 @@ void MFPolyline::Add(MFPoint * newPoint) {
 
 MFPolygon::MFPolygon(int setId) {
     id = setId;
+}
+
+void MFPolygon::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
 }
 
 void MFPolygon::Draw(CDC & dc, MapBound & bound, COLORREF color) {

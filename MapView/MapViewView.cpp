@@ -71,11 +71,17 @@ void CMapViewView::OnDraw(CDC* pDC)
     double displayRatio = double(displayRect.Height()) / displayRect.Width();
     double mapRatio = pDoc->bound.MapHeight() / pDoc->bound.MapWidth();
     if (displayRatio > mapRatio) {
-        int displayHeightHalf = int(displayRect.Width() * mapRatio / 2);
-        pDoc->bound.SetDisplay(0, displayRect.Height() / 2 + displayHeightHalf, displayRect.right, displayRect.Height() / 2 - displayHeightHalf);
+        int displayHeightHalf = int(displayRect.Width() * 0.9 * mapRatio / 2);
+        pDoc->bound.SetDisplay(int(displayRect.Width() * 0.05),
+                               int(displayRect.Height() / 2 + displayHeightHalf),
+                               int(displayRect.Width() * 0.95),
+                               int(displayRect.Height() / 2 - displayHeightHalf));
     } else {
-        int displayWidthHalf = int(displayRect.Height() / mapRatio / 2);
-        pDoc->bound.SetDisplay(displayRect.Width() / 2 - displayWidthHalf, displayRect.Height(), displayRect.Width() / 2 + displayWidthHalf, 0);
+        int displayWidthHalf = int(displayRect.Height() * 0.9 / mapRatio / 2);
+        pDoc->bound.SetDisplay(int(displayRect.Width() / 2 - displayWidthHalf),
+                               int(displayRect.Height() * 0.95),
+                               int(displayRect.Width() / 2 + displayWidthHalf),
+                               int(displayRect.Height() * 0.05));
     }
 
     // 双缓存
@@ -85,6 +91,21 @@ void CMapViewView::OnDraw(CDC* pDC)
     memBitmap.CreateCompatibleBitmap(pDC, displayRect.right, displayRect.bottom);
     CBitmap *pOldBit = memDC.SelectObject(&memBitmap);
     memDC.FillSolidRect(0, 0, displayRect.right, displayRect.bottom, RGB(255, 255, 255));
+
+    // 绘制 Bound
+    /*
+    CBrush brush;
+    brush.CreateSolidBrush(RGB(0, 0, 0));
+    CGdiObject *pOldBrush = memDC.SelectObject(&brush);
+    CPen pen;
+    pen.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    CPen *pOldPen = memDC.SelectObject(&pen);
+
+    memDC.Rectangle(pDoc->bound.displayLeft, pDoc->bound.displayTop, pDoc->bound.displayRight, pDoc->bound.displayButtom);
+
+    memDC.SelectObject(pOldPen);
+    memDC.SelectObject(pOldBrush);
+    */
 
     for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
         COLORREF color;

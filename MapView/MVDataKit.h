@@ -52,6 +52,7 @@ public:
     MapFeature() {};
     virtual ~MapFeature() {};
     virtual FeatureType GetType() { return FT_NONE; };
+    virtual void Affine(double a1, double b1, double c1, double a2, double b2, double c2) {};
     virtual void Draw(CDC & dc, MapBound & bound, COLORREF color) {};
     virtual bool DidSelected(MFPoint & selectPoint, double buffer = 2) { return false; };
     
@@ -66,6 +67,7 @@ public:
     ~MFPoint() {};
     // 重写功能
     FeatureType GetType() { return FT_POINT; };
+    void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 属性
@@ -80,6 +82,7 @@ public:
     ~MFPolyline() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
+    void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
@@ -96,6 +99,7 @@ public:
     ~MFPolygon() {};
     // 重写功能
     FeatureType GetType() { return FT_POLYLINE; };
+    void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, COLORREF color);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
     // 新方法
