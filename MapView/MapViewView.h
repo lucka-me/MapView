@@ -44,7 +44,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	DECLARE_MESSAGE_MAP()
 public:
-    afx_msg void OnBuildIndex();
+    
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

@@ -24,11 +24,11 @@ void MapBound::SetDisplay(int left, int buttom, int right, int top) {
 }
 
 double MapBound::MapWidth() {
-    return mapTop - mapButtom;
+    return mapRight - mapLeft;
 }
 
 double MapBound::MapHeight() {
-    return mapRight - mapLeft;
+    return mapTop - mapButtom;
 }
 
 CPoint MapBound::ConvertToDisplay(MFPoint point) {
@@ -64,26 +64,31 @@ MFPoint * MapBound::ConvertToMap(int x, int y) {
 
 // MARK: MFPoint
 
-MFPoint::MFPoint(double setX, double setY, int setId) {
+MFPoint::MFPoint(double setX, double setY, int setId, int setSN) {
+    SN = setSN;
     id = setId;
     x = setX;
     y = setY;
 }
 
 void MFPoint::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
+    double tempX = x;
+    double tempY = y;
+    x = a1 * tempX + b1 * tempY + c1;
+    y = a2 * tempX + b2 * tempY + c2;
 }
 
-void MFPoint::Draw(CDC & dc, MapBound & bound, COLORREF color) {
+void MFPoint::Draw(CDC & dc, MapBound & bound, MFStyle style) {
     CPoint displayPoint = bound.ConvertToDisplay(x, y);
-    CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 1, color);
-    CPen *pOldPen = dc.SelectObject(&pen);
+    //CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
+    //CPen pen;
+    //pen.CreatePen(PS_SOLID, 1, style.lineColor);
+    //CPen *pOldPen = dc.SelectObject(&pen);
 
-    dc.SetPixel(displayPoint.x, displayPoint.y, color);
+    dc.SetPixel(displayPoint.x, displayPoint.y, style.lineColor);
 
-    dc.SelectObject(pOldPen);
-    dc.SelectObject(pOldBrush);
+    //dc.SelectObject(pOldPen);
+    //dc.SelectObject(pOldBrush);
 }
 
 bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
@@ -95,17 +100,20 @@ bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
 
 // MARK: MFPolyline
 
-MFPolyline::MFPolyline(int setId) {
+MFPolyline::MFPolyline(int setId, int setSN) {
+    SN = setSN;
     id = setId;
 }
 
 void MFPolyline::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
+    for (int i = 0; i < pointList.GetSize(); i++)
+        pointList[i]->Affine(a1, b1, c1, a2, b2, c2);
 }
 
-void MFPolyline::Draw(CDC & dc, MapBound & bound, COLORREF color) {
+void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle style) {
     CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
     CPen pen;
-    pen.CreatePen(PS_SOLID, 1, color);
+    pen.CreatePen(style.penStyle, style.lineWidth, style.lineColor);
     CPen *pOldPen = dc.SelectObject(&pen);
 
     CPoint * pList = bound.ConvertToDisplay(pointList);
@@ -130,19 +138,22 @@ void MFPolyline::Add(MFPoint * newPoint) {
 
 // MARK: MFPolygon
 
-MFPolygon::MFPolygon(int setId) {
+MFPolygon::MFPolygon(int setId, int setSN) {
+    SN = setSN;
     id = setId;
 }
 
 void MFPolygon::Affine(double a1, double b1, double c1, double a2, double b2, double c2) {
+    for (int i = 0; i < pointList.GetSize(); i++)
+        pointList[i]->Affine(a1, b1, c1, a2, b2, c2);
 }
 
-void MFPolygon::Draw(CDC & dc, MapBound & bound, COLORREF color) {
+void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle style) {
     CBrush brush;
-    brush.CreateSolidBrush(color);
+    brush.CreateSolidBrush(style.fillColor);
     CGdiObject *pOldBrush = dc.SelectObject(&brush);
     CPen pen;
-    pen.CreatePen(PS_SOLID, 1, color);
+    pen.CreatePen(style.penStyle, style.lineWidth, style.lineColor);
     CPen *pOldPen = dc.SelectObject(&pen);
 
     CPoint * pList = bound.ConvertToDisplay(pointList);

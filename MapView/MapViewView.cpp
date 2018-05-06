@@ -28,7 +28,6 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMapViewView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
-    ON_COMMAND(ID_BUILD_INDEX, &CMapViewView::OnBuildIndex)
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -108,33 +107,74 @@ void CMapViewView::OnDraw(CDC* pDC)
     */
 
     for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
-        COLORREF color;
+        MFStyle style;
         switch (pDoc->featureList[i]->id) {
-            case 10000:
-            case 10001:
-            case 10003:
-            case 10004: {
-                color = RGB(255, 0, 0);
+            case 10000: {   // 图廓
+                style.lineColor = RGB(0, 0, 0);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
                 break;
             }
-            case 20000:
-            case 20001:
-            case 20002:
-            case 20003:
-            case 20004: {
-                color = RGB(0, 255, 0);
+            case 10001: {   // 铁路
+                style.lineColor = RGB(0, 0, 0);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
                 break;
             }
-            case 30000: {
-                color = RGB(0, 0, 255);
+            case 10003: {   // 汽渡
+                style.lineColor = RGB(72, 92, 194);
+                style.lineWidth = 1;
+                style.penStyle = PS_DASH;
+                break;
+            }
+            case 10004: {   // 主要道路
+                style.lineColor = RGB(255, 0, 0);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
+                break;
+            }
+            case 20001: {   // 码头
+                style.lineColor = RGB(72, 92, 194);
+                style.fillColor = RGB(90, 152, 245);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
+                break;
+            }
+            case 20002: {   // 铁路中转站
+                style.lineColor = RGB(148, 147, 145);
+                style.fillColor = RGB(171, 169, 164);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
+                break;
+            }
+            case 20003: {   // 河流、湖泊
+                style.lineColor = RGB(83, 143, 189);
+                style.fillColor = RGB(102, 189, 204);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
+                break;
+            }
+            case 20004: {   // 居民地
+                style.lineColor = RGB(0, 103, 167);
+                style.fillColor = RGB(168, 185, 189);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
+                break;
+            }
+            case 30000: {   // 控制点
+                style.lineColor = RGB(0, 0, 255);
+                style.penStyle = PS_SOLID;
                 break;
             }
             default: {
-                color = RGB(255, 255, 255);
+                style.lineColor = RGB(255, 255, 255);
+                style.fillColor = RGB(255, 255, 255);
+                style.lineWidth = 1;
+                style.penStyle = PS_SOLID;
                 break;
             }
         }
-        pDoc->featureList[i]->Draw(memDC, pDoc->bound, color);
+        pDoc->featureList[i]->Draw(memDC, pDoc->bound, style);
     }
 
     pDC->BitBlt(0, 0, displayRect.right, displayRect.bottom, &memDC, 0, 0, SRCCOPY);
@@ -206,6 +246,3 @@ CMapViewDoc* CMapViewView::GetDocument() const // 非调试版本是内联的
 
 // CMapViewView 消息处理程序
 
-void CMapViewView::OnBuildIndex() {
-    // TODO: 在此添加命令处理程序代码
-}

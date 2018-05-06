@@ -131,7 +131,8 @@ BEGIN
     END
     POPUP "数据处理(&D)"
     BEGIN
-        MENUITEM "建立索引",                        ID_BUILD_INDEX
+        MENUITEM "坐标变换",                        ID_DATA_AFFINE
+        MENUITEM "建立索引",                        ID_DATA_BUILD_INDEX
     END
     POPUP "视图(&V)"
     BEGIN
@@ -205,14 +206,14 @@ BEGIN
     BEGIN
         BLOCK "080404B0"
         BEGIN
-            VALUE "CompanyName", "TODO: <公司名>"
+            VALUE "CompanyName", "长安大学地质工程与测绘学院2015级地理信息科学501班"
             VALUE "FileDescription", "MapView"
-            VALUE "FileVersion", "1.0.0.1"
+            VALUE "FileVersion", "0.1"
             VALUE "InternalName", "MapView.exe"
-            VALUE "LegalCopyright", "TODO:  (C) <公司名>。  保留所有权利。"
+            VALUE "LegalCopyright", "本软件基于 MIT 许可证。"
             VALUE "OriginalFilename", "MapView.exe"
-            VALUE "ProductName", "TODO: <产品名>"
-            VALUE "ProductVersion", "1.0.0.1"
+            VALUE "ProductName", "MapView"
+            VALUE "ProductVersion", "0.1"
         END
     END
     BLOCK "VarFileInfo"

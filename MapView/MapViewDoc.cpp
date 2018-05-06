@@ -23,6 +23,8 @@
 IMPLEMENT_DYNCREATE(CMapViewDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CMapViewDoc, CDocument)
+    ON_COMMAND(ID_DATA_AFFINE, &CMapViewDoc::OnDataAffine)
+    ON_COMMAND(ID_DATA_BUILD_INDEX, &CMapViewDoc::OnDataBuildIndex)
 END_MESSAGE_MAP()
 
 
@@ -60,9 +62,9 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
 
     featureList.RemoveAll();
     featureList.Add(new MapFeature());  // 占位用，因为数据序号从1开始
-    CTypedPtrArray<CObArray, MFPoint *> controlPointList;
+    controlPointList.RemoveAll();
 
-    int index, featureID;
+    int SN, featureID;
     int blank;  // 用于处理无用输入
 
     // 修改状态栏，添加进度条
@@ -76,7 +78,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
         file.ReadString(line);
         if (line.Find(_T("-999999.0,-999999.0")) != -1)
             break;
-        decoder.Decode(line, index, blank);
+        decoder.Decode(line, SN, blank);
         file.ReadString(line);
         decoder.Decode(line, featureID, blank);
 
@@ -85,7 +87,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
             case 10001:
             case 10003:
             case 10004: {
-                MFPolyline * newPolyline = new MFPolyline(featureID);
+                MFPolyline * newPolyline = new MFPolyline(featureID, SN);
                 double x, y;
                 do {
                     file.ReadString(line);
@@ -102,7 +104,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
             case 20002:
             case 20003:
             case 20004: {
-                MFPolygon * newPolyline = new MFPolygon(featureID);
+                MFPolygon * newPolyline = new MFPolygon(featureID, SN);
                 double x, y;
                 do {
                     file.ReadString(line);
@@ -118,7 +120,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 double x, y;
                 file.ReadString(line);
                 decoder.Decode(line, x, y);
-                MFPoint * point = new MFPoint(x, y, featureID);
+                MFPoint * point = new MFPoint(x, y, featureID, SN);
                 featureList.Add(point);
                 controlPointList.Add(point);
                 file.ReadString(line);
@@ -138,60 +140,9 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
     }
 
     // 仿射变换
-    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
-    pFrame->m_wndStatusBar.SetPaneText(0, _T("仿射变换处理中"));
-
-
-    // 以控制点确定图幅
-    double left, buttom, right, top;
-    buttom = controlPointList[0]->x;
-    top    = controlPointList[0]->x;
-    left   = controlPointList[0]->y;
-    right  = controlPointList[0]->y;
-    for (int i = 1; i < controlPointList.GetSize(); i++) {
-        buttom = controlPointList[i]->x < buttom ? controlPointList[i]->x : buttom;
-        top    = controlPointList[i]->x >    top ? controlPointList[i]->x :    top;
-        left   = controlPointList[i]->y <   left ? controlPointList[i]->x :   left;
-        right  = controlPointList[i]->y >  right ? controlPointList[i]->x :  right;
-    }
-    bound.SetMap(left, buttom, right, top);
-
+    OnDataAffine();
     // 建立索引
-    pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
-    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
-    pFrame->m_wndStatusBar.SetPaneText(0, _T("建立索引中"));
-
-    int gridResolution = 5; // 网格分辨率
-    int gridRow = int(bound.MapHeight() / gridResolution) + 1;
-    int gridCol = int(bound.MapHeight() / gridResolution) + 1;
-    // 动态建立二维数组
-    //   Reference: StackOverflow 936687
-    gridIndex = new FeatureArray * [gridRow];
-    for (int i = 0; i < gridRow; i++) {
-        gridIndex[i] = new FeatureArray[gridCol];
-    }
-    for (int i = 0; i < featureList.GetSize(); i++) {
-        switch (featureList[i]->GetType()) {
-            case FT_POINT: {
-                MFPoint * point = (MFPoint *)featureList[i];
-                int row = int((point->x - bound.mapButtom) / gridResolution);
-                int col = int((point->y - bound.mapLeft) / gridResolution);
-                gridIndex[row][col].Add(point);
-                break;
-            }
-            case FT_POLYLINE: {
-                MFPolyline * polyline = (MFPolyline *)featureList[i];
-                break;
-            }
-            case FT_POLYGON: {
-                MFPolygon * polygon = (MFPolygon *)featureList[i];
-                break;
-            }
-            default:
-                break;
-        }
-        pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
-    }
+    OnDataBuildIndex();
     
     CString message;
     message.Format(_T("共读取%d条数据。"), featureList.GetSize() - 1);
@@ -271,3 +222,98 @@ void CMapViewDoc::Dump(CDumpContext& dc) const {
 
 
 // CMapViewDoc 命令
+
+// 坐标变换（仿射变换）
+void CMapViewDoc::OnDataAffine() {
+    
+    CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
+    pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
+    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    pFrame->m_wndStatusBar.SetPaneText(0, _T("仿射变换处理中"));
+
+    if (controlPointList.GetSize() < 3) {
+        CString message;
+        message.Format(_T("控制点不足3个，无法进行仿射变换"));
+        AfxMessageBox(message, MB_OK | MB_ICONWARNING);
+    } else {
+        double orgX1 = controlPointList[0]->x, orgY1 = controlPointList[0]->y;
+        double orgX2 = controlPointList[1]->x, orgY2 = controlPointList[1]->y;
+        double orgX3 = controlPointList[2]->x, orgY3 = controlPointList[2]->y;
+
+        double setX1 = 12.5, setY1 = 37.4;
+        double setX2 = 62.5, setY2 = 37.4;
+        double setX3 = 62.5, setY3 = 82.4;
+
+        double a1 = ((setX3 - setX1) * (orgY2 - orgY1) - (setX2 - setX1) * (orgY3 - orgY1))
+            / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
+        double b1 = (setX2 - setX1 + a1 * (orgX1 - orgX2)) / (orgY2 - orgY1);
+        double c1 = setX1 - a1 * orgX1 - b1 * orgY1;
+
+        double a2 = ((setY3 - setY1) * (orgY2 - orgY1) - (setY2 - setY1) * (orgY3 - orgY1))
+            / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
+        double b2 = (setY2 - setY1 + a2 * (orgX1 - orgX2)) / (orgY2 - orgY1);
+        double c2 = setY1 - a2 * orgX1 - b2 * orgY1;
+
+        for (int i = 1; i < featureList.GetSize(); i++) {
+            featureList[i]->Affine(a1, b1, c1, a2, b2, c2);
+            pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
+        }
+
+    }
+
+    // 以控制点确定图幅
+    double left, buttom, right, top;
+    buttom = controlPointList[0]->x;
+    top = controlPointList[0]->x;
+    left = controlPointList[0]->y;
+    right = controlPointList[0]->y;
+    for (int i = 1; i < controlPointList.GetSize(); i++) {
+        buttom = controlPointList[i]->x < buttom ? controlPointList[i]->x : buttom;
+        top = controlPointList[i]->x >    top ? controlPointList[i]->x : top;
+        left = controlPointList[i]->y <   left ? controlPointList[i]->y : left;
+        right = controlPointList[i]->y >  right ? controlPointList[i]->y : right;
+    }
+    bound.SetMap(left, buttom, right, top);
+    
+}
+
+// 建立索引
+void CMapViewDoc::OnDataBuildIndex() {
+
+    CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
+    pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
+    pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
+    pFrame->m_wndStatusBar.SetPaneText(0, _T("建立索引中"));
+
+    int gridResolution = 5; // 网格分辨率
+    int gridRow = int(bound.MapHeight() / gridResolution) + 1;
+    int gridCol = int(bound.MapWidth() / gridResolution) + 1;
+    // 动态建立二维数组
+    //   Reference: StackOverflow 936687
+    gridIndex = new FeatureArray *[gridRow];
+    for (int i = 0; i < gridRow; i++) {
+        gridIndex[i] = new FeatureArray[gridCol];
+    }
+    for (int i = 0; i < featureList.GetSize(); i++) {
+        switch (featureList[i]->GetType()) {
+        case FT_POINT: {
+            MFPoint * point = (MFPoint *)featureList[i];
+            int row = int((point->x - bound.mapButtom) / gridResolution);
+            int col = int((point->y - bound.mapLeft) / gridResolution);
+            gridIndex[row][col].Add(point);
+            break;
+        }
+        case FT_POLYLINE: {
+            MFPolyline * polyline = (MFPolyline *)featureList[i];
+            break;
+        }
+        case FT_POLYGON: {
+            MFPolygon * polygon = (MFPolygon *)featureList[i];
+            break;
+        }
+        default:
+            break;
+        }
+        pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
+    }
+}
