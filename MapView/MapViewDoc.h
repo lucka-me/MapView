@@ -40,7 +40,7 @@ public:
     FeatureArray featureList;
     CTypedPtrArray<CObArray, MFPoint *> controlPointList;
     MapBound bound;
-    FeatureArray ** gridIndex;
+    GridIndex gridIndex;
 
 protected:
 

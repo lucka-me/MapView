@@ -60,6 +60,16 @@ MFPoint * MapBound::ConvertToMap(int x, int y) {
     return new MFPoint(mapX, mapY);
 }
 
+// MARK: FeatureArray
+
+bool FeatureArray::HasFeature(MapFeature * pFeature) {
+    for (int i = 0; i < GetSize(); i++)
+        if (GetAt(i) == pFeature)
+            return true;
+    
+    return false;
+}
+
 // MARK: MapFeature
 
 // MARK: MFPoint
@@ -80,15 +90,7 @@ void MFPoint::Affine(double a1, double b1, double c1, double a2, double b2, doub
 
 void MFPoint::Draw(CDC & dc, MapBound & bound, MFStyle style) {
     CPoint displayPoint = bound.ConvertToDisplay(x, y);
-    //CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
-    //CPen pen;
-    //pen.CreatePen(PS_SOLID, 1, style.lineColor);
-    //CPen *pOldPen = dc.SelectObject(&pen);
-
     dc.SetPixel(displayPoint.x, displayPoint.y, style.lineColor);
-
-    //dc.SelectObject(pOldPen);
-    //dc.SelectObject(pOldBrush);
 }
 
 bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
@@ -124,7 +126,28 @@ void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle style) {
 }
 
 bool MFPolyline::DidSelected(MFPoint & selectPoint, double buffer) {
-    return false;
+    bool result = false;
+    for (int i = 1; i < pointList.GetSize(); i++) {
+        MFPoint * pointA = (MFPoint *)pointList[i - 1];
+        MFPoint * pointB = (MFPoint *)pointList[i];
+        double left   = pointA->y < pointB->y ? pointA->y : pointB->y;
+        double bottom = pointA->x < pointB->x ? pointA->x : pointB->x;
+        double right  = pointA->y > pointB->y ? pointA->y : pointB->y;
+        double top    = pointA->x > pointB->x ? pointA->x : pointB->x;
+        if ((selectPoint.y < left   - buffer) &&
+            (selectPoint.x < bottom + buffer) &&
+            (selectPoint.y > right  - buffer) &&
+            (selectPoint.x > top    + buffer)) {
+            double A = pointA->y - pointB->y;
+            double B = pointB->x - pointA->x;
+            double C = pointA->x * pointB->y - pointB->x * pointA->y;
+            if (fabs((A * selectPoint.x + B * selectPoint.y + C) / sqrt(A * A + B * B)) <= buffer) {
+                result = true;
+                break;
+            }
+        }
+    }
+    return result;
 }
 
 void MFPolyline::Set(MFPoint * startPoint) {
@@ -164,7 +187,19 @@ void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle style) {
 }
 
 bool MFPolygon::DidSelected(MFPoint & selectPoint, double buffer) {
-    return false;
+    bool result = false;
+    MFPoint * pointA = (MFPoint *)pointList[pointList.GetSize() - 1];
+    MFPoint * pointB = (MFPoint *)pointList[0];
+    double angleSum = atan((pointA->y - selectPoint.y) / (pointA->x - selectPoint.x)) 
+                    - atan((pointB->y - selectPoint.y) / (pointB->x - selectPoint.x));
+    for (int i = 1; i < pointList.GetSize(); i++) {
+        MFPoint * pointA = (MFPoint *)pointList[i - 1];
+        MFPoint * pointB = (MFPoint *)pointList[i];
+        angleSum += atan((pointA->y - selectPoint.y) / (pointA->x - selectPoint.x))
+                  - atan((pointB->y - selectPoint.y) / (pointB->x - selectPoint.x));
+    }
+    return angleSum < REAL_EPSILON;
+    
 }
 
 void MFPolygon::Set(MFPoint * startPoint) {
@@ -174,6 +209,19 @@ void MFPolygon::Set(MFPoint * startPoint) {
 
 void MFPolygon::Add(MFPoint * newPoint) {
     pointList.Add(newPoint);
+}
+
+// MARK: GridIndex
+void GridIndex::Set(double setResolution, MapBound & bound) {
+    resolution = setResolution;
+    row = int(bound.MapHeight() / resolution) + 1;
+    col = int(bound.MapWidth()  / resolution) + 1;
+    // 动态建立二维数组
+    //   Reference: StackOverflow 936687
+    index = new FeatureArray *[row];
+    for (int i = 0; i < row; i++) {
+        index[i] = new FeatureArray[col];
+    }
 }
 
 // MARK: MVDecoder

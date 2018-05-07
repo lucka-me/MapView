@@ -12,13 +12,14 @@ typedef enum _FeatureType {
 // MARK: Class
 
 class MapBound;
-class MVDecoder;
 class MFStyle;
 class FeatureArray;
 class MapFeature;
 class MFPoint;
 class MFPolyline;
 class MFPolygon;
+class GridIndex;
+class MVDecoder;
 
 // 图廓类
 class MapBound {
@@ -41,14 +42,6 @@ public:
     int displayLeft, displayButtom, displayRight, displayTop;    // 显示的范围
 };
 
-// 解码器
-class MVDecoder {
-public:
-    void Decode(CString line, int & a, int & b);
-    void Decode(CString line, double & a, double & b);
-    double ToDouble(CString str);
-};
-
 // 要素样式
 class MFStyle {
 public:
@@ -64,6 +57,7 @@ class FeatureArray :
 public:
     FeatureArray() {};
     ~FeatureArray() {};
+    bool HasFeature(MapFeature * pFeature);
 };
 
 // 要素类
@@ -88,7 +82,7 @@ class MFPoint :
 public:
     MFPoint(double setX = 0.0, double setY = 0.0, int setId = 0, int setSN = 0);
     ~MFPoint() {};
-    // 重写功能
+    // 重写方法
     FeatureType GetType() { return FT_POINT; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, MFStyle style);
@@ -103,7 +97,7 @@ class MFPolyline :
 public:
     MFPolyline(int setId = 0, int setSN = 0);
     ~MFPolyline() {};
-    // 重写功能
+    // 重写方法
     FeatureType GetType() { return FT_POLYLINE; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, MFStyle style);
@@ -120,8 +114,8 @@ class MFPolygon :
 public:
     MFPolygon(int setId = 0, int setSN = 0);
     ~MFPolygon() {};
-    // 重写功能
-    FeatureType GetType() { return FT_POLYLINE; };
+    // 重写方法
+    FeatureType GetType() { return FT_POLYGON; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
     void Draw(CDC & dc, MapBound & bound, MFStyle style);
     bool DidSelected(MFPoint & selectPoint, double buffer = 2);
@@ -130,4 +124,27 @@ public:
     void Add(MFPoint * newPoint);
     // 属性
     FeatureArray pointList;
+};
+
+// 网格索引
+class GridIndex {
+public:
+    // 方法
+    GridIndex() {};
+    ~GridIndex() {};
+    void Set(double setResolution, MapBound & bound);
+    // 属性
+    double resolution = 5.0;
+    int row = 0;
+    int col = 0;
+    FeatureArray ** index;
+};
+
+
+// 解码器
+class MVDecoder {
+public:
+    void Decode(CString line, int & a, int & b);
+    void Decode(CString line, double & a, double & b);
+    double ToDouble(CString str);
 };

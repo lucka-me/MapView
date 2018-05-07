@@ -332,6 +332,9 @@ bool CMapViewDoc::DoBuildIndex() {
 
     double gridResolution = 5.0; // 网格分辨率
     gridIndex.Set(gridResolution, bound);
+    CString message;
+    message.Format(_T("%d Row, %d Col"), gridIndex.row, gridIndex.col);
+    AfxMessageBox(message, MB_OK);
     
     for (int i = 0; i < featureList.GetSize(); i++) {
         switch (featureList[i]->GetType()) {
