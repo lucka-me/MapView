@@ -11,6 +11,7 @@
 
 #include "MapViewDoc.h"
 #include "MainFrm.h"
+#include "AffineDialg.h"
 
 #include <propkey.h>
 
@@ -23,8 +24,7 @@
 IMPLEMENT_DYNCREATE(CMapViewDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CMapViewDoc, CDocument)
-    ON_COMMAND(ID_DATA_AFFINE, &CMapViewDoc::OnDataAffine)
-    ON_COMMAND(ID_DATA_BUILD_INDEX, &CMapViewDoc::OnDataBuildIndex)
+    
 END_MESSAGE_MAP()
 
 
@@ -140,9 +140,9 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
     }
 
     // 仿射变换
-    OnDataAffine();
+    DoAffine();
     // 建立索引
-    OnDataBuildIndex();
+    DoBuildIndex();
     
     CString message;
     message.Format(_T("共读取%d条数据。"), featureList.GetSize() - 1);
@@ -224,7 +224,7 @@ void CMapViewDoc::Dump(CDumpContext& dc) const {
 // CMapViewDoc 命令
 
 // 坐标变换（仿射变换）
-void CMapViewDoc::OnDataAffine() {
+bool CMapViewDoc::DoAffine() {
     
     CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
@@ -240,45 +240,61 @@ void CMapViewDoc::OnDataAffine() {
         double orgX2 = controlPointList[1]->x, orgY2 = controlPointList[1]->y;
         double orgX3 = controlPointList[2]->x, orgY3 = controlPointList[2]->y;
 
-        double setX1 = 12.5, setY1 = 37.4;
-        double setX2 = 62.5, setY2 = 37.4;
-        double setX3 = 62.5, setY3 = 82.4;
+        CAffineDialg affineDlg(orgX1, orgY1, orgX2, orgY2, orgX3, orgY3);
+        if (affineDlg.DoModal() == IDOK) {
+            double setX1, setY1;
+            double setX2, setY2;
+            double setX3, setY3;
+            affineDlg.Get(setX1, setY1, setX2, setY2, setX3, setY3);
 
-        double a1 = ((setX3 - setX1) * (orgY2 - orgY1) - (setX2 - setX1) * (orgY3 - orgY1))
-            / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
-        double b1 = (setX2 - setX1 + a1 * (orgX1 - orgX2)) / (orgY2 - orgY1);
-        double c1 = setX1 - a1 * orgX1 - b1 * orgY1;
+            if ((orgY2 - orgY1) == 0.0 ||
+                (orgY2 - orgY1) == 0.0 ||
+                ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1)) == 0.0 ||
+                ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1)) == 0.0) {
+                AfxMessageBox(_T("无法计算仿射变换参数。"), MB_OK | MB_ICONWARNING);
+            } else {
+                double a1 = ((setX3 - setX1) * (orgY2 - orgY1) - (setX2 - setX1) * (orgY3 - orgY1))
+                    / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
+                double b1 = (setX2 - setX1 + a1 * (orgX1 - orgX2)) / (orgY2 - orgY1);
+                double c1 = setX1 - a1 * orgX1 - b1 * orgY1;
 
-        double a2 = ((setY3 - setY1) * (orgY2 - orgY1) - (setY2 - setY1) * (orgY3 - orgY1))
-            / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
-        double b2 = (setY2 - setY1 + a2 * (orgX1 - orgX2)) / (orgY2 - orgY1);
-        double c2 = setY1 - a2 * orgX1 - b2 * orgY1;
+                double a2 = ((setY3 - setY1) * (orgY2 - orgY1) - (setY2 - setY1) * (orgY3 - orgY1))
+                    / ((orgX1 - orgX2) * (orgY3 - orgY1) - (orgX1 - orgX3) * (orgY2 - orgY1));
+                double b2 = (setY2 - setY1 + a2 * (orgX1 - orgX2)) / (orgY2 - orgY1);
+                double c2 = setY1 - a2 * orgX1 - b2 * orgY1;
 
-        for (int i = 1; i < featureList.GetSize(); i++) {
-            featureList[i]->Affine(a1, b1, c1, a2, b2, c2);
-            pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
+                for (int i = 1; i < featureList.GetSize(); i++) {
+                    featureList[i]->Affine(a1, b1, c1, a2, b2, c2);
+                    pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
+                }
+            }
+            
         }
-
     }
 
     // 以控制点确定图幅
     double left, buttom, right, top;
     buttom = controlPointList[0]->x;
-    top = controlPointList[0]->x;
-    left = controlPointList[0]->y;
-    right = controlPointList[0]->y;
+    top    = controlPointList[0]->x;
+    left   = controlPointList[0]->y;
+    right  = controlPointList[0]->y;
     for (int i = 1; i < controlPointList.GetSize(); i++) {
         buttom = controlPointList[i]->x < buttom ? controlPointList[i]->x : buttom;
-        top = controlPointList[i]->x >    top ? controlPointList[i]->x : top;
-        left = controlPointList[i]->y <   left ? controlPointList[i]->y : left;
-        right = controlPointList[i]->y >  right ? controlPointList[i]->y : right;
+        top    = controlPointList[i]->x >    top ? controlPointList[i]->x : top;
+        left   = controlPointList[i]->y <   left ? controlPointList[i]->y : left;
+        right  = controlPointList[i]->y >  right ? controlPointList[i]->y : right;
     }
     bound.SetMap(left, buttom, right, top);
+    //CString message;
+    //message.Format(_T("%d个控制点(%.3f, %.3f, %.3f, %.3f)"), controlPointList.GetSize(), left, buttom, right, top);
+    //message.Format(_T("(%.3f, %.3f)"), controlPointList[0]->x, controlPointList[0]->y);
+    //AfxMessageBox(message, MB_OK | MB_ICONWARNING);
     
+    return true;//DoBuildIndex();
 }
 
 // 建立索引
-void CMapViewDoc::OnDataBuildIndex() {
+bool CMapViewDoc::DoBuildIndex() {
 
     CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
@@ -316,4 +332,6 @@ void CMapViewDoc::OnDataBuildIndex() {
         }
         pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
     }
+
+    return true;
 }

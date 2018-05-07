@@ -45,6 +45,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     
+    afx_msg void OnDataAffine();
+    afx_msg void OnDataBuildIndex();
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

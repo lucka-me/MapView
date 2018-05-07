@@ -195,3 +195,13 @@ void MVDecoder::Decode(CString line, double & a, double & b) {
     ss << str;
     ss >> a >> b;
 }
+
+double MVDecoder::ToDouble(CString str) {
+    std::string temp;
+    std::stringstream ss;
+    temp = CT2A(str.GetBuffer());
+    ss << temp;
+    double result;
+    ss >> result;
+    return result;
+}

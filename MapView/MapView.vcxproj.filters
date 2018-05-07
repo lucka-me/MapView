@@ -39,6 +39,9 @@
     <ClInclude Include="MVDataKit.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AffineDialg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MapView.cpp">
@@ -57,6 +60,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MVDataKit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AffineDialg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

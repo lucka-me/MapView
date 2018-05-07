@@ -28,6 +28,8 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMapViewView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+    ON_COMMAND(ID_DATA_AFFINE, &CMapViewView::OnDataAffine)
+    ON_COMMAND(ID_DATA_BUILD_INDEX, &CMapViewView::OnDataBuildIndex)
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -90,21 +92,6 @@ void CMapViewView::OnDraw(CDC* pDC)
     memBitmap.CreateCompatibleBitmap(pDC, displayRect.right, displayRect.bottom);
     CBitmap *pOldBit = memDC.SelectObject(&memBitmap);
     memDC.FillSolidRect(0, 0, displayRect.right, displayRect.bottom, RGB(255, 255, 255));
-
-    // 绘制 Bound
-    /*
-    CBrush brush;
-    brush.CreateSolidBrush(RGB(0, 0, 0));
-    CGdiObject *pOldBrush = memDC.SelectObject(&brush);
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-    CPen *pOldPen = memDC.SelectObject(&pen);
-
-    memDC.Rectangle(pDoc->bound.displayLeft, pDoc->bound.displayTop, pDoc->bound.displayRight, pDoc->bound.displayButtom);
-
-    memDC.SelectObject(pOldPen);
-    memDC.SelectObject(pOldBrush);
-    */
 
     for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
         MFStyle style;
@@ -246,3 +233,17 @@ CMapViewDoc* CMapViewView::GetDocument() const // 非调试版本是内联的
 
 // CMapViewView 消息处理程序
 
+void CMapViewView::OnDataAffine() {
+    // TODO: 在此添加命令处理程序代码
+    CMapViewDoc* pDoc = GetDocument();
+    pDoc->DoAffine();
+    Invalidate();
+}
+
+
+void CMapViewView::OnDataBuildIndex() {
+    // TODO: 在此添加命令处理程序代码
+    CMapViewDoc* pDoc = GetDocument();
+    pDoc->DoBuildIndex();
+    Invalidate();
+}

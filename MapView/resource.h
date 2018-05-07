@@ -14,6 +14,19 @@
 #define IDR_MAINFRAME_256               129
 #define IDR_MapViewTYPE                 130
 #define IDS_EDIT_MENU                   306
+#define IDD_AFFINEBOX                   313
+#define IDC_AFFINE_SET_X1               1006
+#define IDC_AFFINE_SET_Y1               1007
+#define IDC_AFFINE_SET_X2               1008
+#define IDC_AFFINE_SET_Y2               1009
+#define IDC_AFFINE_SET_X3               1010
+#define IDC_AFFINE_SET_Y3               1011
+#define IDC_AFFINE_ORG_X1               1012
+#define IDC_AFFINE_ORG_Y1               1013
+#define IDC_AFFINE_ORG_X2               1014
+#define IDC_AFFINE_ORG_Y2               1015
+#define IDC_AFFINE_ORG_X3               1016
+#define IDC_AFFINE_ORG_Y3               1017
 #define ID_BUILD_INDEX                  32772
 #define ID_32775                        32775
 #define ID_AFF                          32776
@@ -26,9 +39,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        313
+#define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif
