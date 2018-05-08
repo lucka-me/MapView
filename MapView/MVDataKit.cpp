@@ -134,10 +134,10 @@ bool MFPolyline::DidSelected(MFPoint & selectPoint, double buffer) {
         double bottom = pointA->x < pointB->x ? pointA->x : pointB->x;
         double right  = pointA->y > pointB->y ? pointA->y : pointB->y;
         double top    = pointA->x > pointB->x ? pointA->x : pointB->x;
-        if ((selectPoint.y < left   - buffer) &&
-            (selectPoint.x < bottom + buffer) &&
-            (selectPoint.y > right  - buffer) &&
-            (selectPoint.x > top    + buffer)) {
+        if ((selectPoint.y > left   - buffer) &&
+            (selectPoint.x > bottom - buffer) &&
+            (selectPoint.y < right  + buffer) &&
+            (selectPoint.x < top    + buffer)) {
             double A = pointA->y - pointB->y;
             double B = pointB->x - pointA->x;
             double C = pointA->x * pointB->y - pointB->x * pointA->y;

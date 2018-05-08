@@ -134,6 +134,15 @@ BEGIN
         MENUITEM "坐标变换",                        ID_DATA_AFFINE
         MENUITEM "建立索引",                        ID_DATA_BUILD_INDEX
     END
+    POPUP "数据检索(&R)"
+    BEGIN
+        POPUP "点击查询"
+        BEGIN
+            MENUITEM "点",                           ID_RETRIEVE_CLICK_POINT
+            MENUITEM "线",                           ID_RETRIEVE_CLICK_POLYLINE
+            MENUITEM "面",                           ID_RETRIEVE_CLICK_POLYGON
+        END
+    END
     POPUP "视图(&V)"
     BEGIN
         POPUP "工具栏和停靠窗口(&T)"

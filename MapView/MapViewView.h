@@ -17,6 +17,15 @@ public:
 
 // 操作
 public:
+    // 操作类型
+    enum Operation {
+        OPR_NONE,   // 无操作
+        OPR_RETRIEVE_CLICK_POINT,       // 点击检索-点
+        OPR_RETRIEVE_CLICK_POLYLINE,    // 点击检索-线
+        OPR_RETRIEVE_CLICK_POLYGON,     // 点击检索-面
+    } oprType;
+    // 方法
+    void CancelOpr();
 
 // 重写
 public:
@@ -47,6 +56,10 @@ public:
     
     afx_msg void OnDataAffine();
     afx_msg void OnDataBuildIndex();
+    afx_msg void OnRetrieveClickPoint();
+    afx_msg void OnRetrieveClickPolyline();
+    afx_msg void OnRetrieveClickPolygon();
+    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

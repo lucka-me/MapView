@@ -30,6 +30,10 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
 	ON_WM_RBUTTONUP()
     ON_COMMAND(ID_DATA_AFFINE, &CMapViewView::OnDataAffine)
     ON_COMMAND(ID_DATA_BUILD_INDEX, &CMapViewView::OnDataBuildIndex)
+    ON_COMMAND(ID_RETRIEVE_CLICK_POINT, &CMapViewView::OnRetrieveClickPoint)
+    ON_COMMAND(ID_RETRIEVE_CLICK_POLYLINE, &CMapViewView::OnRetrieveClickPolyline)
+    ON_COMMAND(ID_RETRIEVE_CLICK_POLYGON, &CMapViewView::OnRetrieveClickPolygon)
+    ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -198,8 +202,61 @@ void CMapViewView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 
 void CMapViewView::OnRButtonUp(UINT /* nFlags */, CPoint point)
 {
-	ClientToScreen(&point);
-	OnContextMenu(this, point);
+	//ClientToScreen(&point);
+	//OnContextMenu(this, point);
+    CancelOpr();
+}
+
+void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
+    // TODO: 在此添加消息处理程序代码和/或调用默认值
+    if (oprType == OPR_NONE)
+        return;
+
+    CMapViewDoc* pDoc = GetDocument();
+    MFPoint * mapPoint = pDoc->bound.ConvertToMap(point);
+    int row = int((mapPoint->x - pDoc->bound.mapButtom) / pDoc->gridIndex.resolution);
+    int col = int((mapPoint->y - pDoc->bound.mapLeft) / pDoc->gridIndex.resolution);
+
+    switch (oprType) {
+        case OPR_RETRIEVE_CLICK_POINT: {
+            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+                if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POINT) {
+                    if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        CString msg;
+                        msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
+                        MessageBox(msg, _T("点击检索 - 点"), MB_OK);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        case OPR_RETRIEVE_CLICK_POLYLINE: {
+            int count = 0;
+            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+                if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYLINE) {
+                    count++;
+                    if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        CString msg;
+                        msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
+                        MessageBox(msg, _T("点击检索 - 线"), MB_OK);
+                        break;
+                    }
+                }
+            }
+            CString msg;
+            msg.Format(_T("在(%d, %d)中有%d个线"), row, col, count);
+            MessageBox(msg, _T("点击检索 - 线"), MB_OK);
+            break;
+        }
+        case OPR_RETRIEVE_CLICK_POLYGON: {
+            break;
+        }
+        default:
+            break;
+    }
+
+    CView::OnLButtonDown(nFlags, point);
 }
 
 void CMapViewView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
@@ -232,18 +289,42 @@ CMapViewDoc* CMapViewView::GetDocument() const // 非调试版本是内联的
 
 
 // CMapViewView 消息处理程序
-
+// 数据处理-坐标转换
 void CMapViewView::OnDataAffine() {
-    // TODO: 在此添加命令处理程序代码
     CMapViewDoc* pDoc = GetDocument();
     pDoc->DoAffine();
     Invalidate();
 }
 
-
+// 数据处理-建立索引
 void CMapViewView::OnDataBuildIndex() {
-    // TODO: 在此添加命令处理程序代码
     CMapViewDoc* pDoc = GetDocument();
     pDoc->DoBuildIndex();
+    Invalidate();
+}
+
+// 数据检索-点选检索-点
+void CMapViewView::OnRetrieveClickPoint() {
+    CancelOpr();
+    oprType = OPR_RETRIEVE_CLICK_POINT;
+}
+
+// 数据检索-点选检索-线
+void CMapViewView::OnRetrieveClickPolyline() {
+    // TODO: 在此添加命令处理程序代码
+    CancelOpr();
+    oprType = OPR_RETRIEVE_CLICK_POLYLINE;
+}
+
+// 数据检索-点选检索-面
+void CMapViewView::OnRetrieveClickPolygon() {
+    // TODO: 在此添加命令处理程序代码
+    CancelOpr();
+    oprType = OPR_RETRIEVE_CLICK_POLYGON;
+}
+
+// 取消操作
+void CMapViewView::CancelOpr() {
+    oprType = OPR_NONE;
     Invalidate();
 }
