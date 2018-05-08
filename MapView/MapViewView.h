@@ -60,6 +60,7 @@ public:
     afx_msg void OnRetrieveClickPolyline();
     afx_msg void OnRetrieveClickPolygon();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+    afx_msg void OnRetrieveId();
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

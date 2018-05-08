@@ -12,6 +12,8 @@
 #include "MapViewDoc.h"
 #include "MapViewView.h"
 
+#include "RetrieveIDDialog.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -34,6 +36,7 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYLINE, &CMapViewView::OnRetrieveClickPolyline)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYGON, &CMapViewView::OnRetrieveClickPolygon)
     ON_WM_LBUTTONDOWN()
+    ON_COMMAND(ID_RETRIEVE_ID, &CMapViewView::OnRetrieveId)
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -172,10 +175,11 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYLINE) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
                         MFStyle style;
-                        CClientDC dc(this);
                         style.lineColor = RGB(255, 219, 79);
+                        style.fillColor = RGB(254, 242, 99);
                         style.lineWidth = 2;
                         style.penStyle = PS_SOLID;
+                        CClientDC dc(this);
                         pDoc->gridIndex.index[row][col][i]->Draw(dc, pDoc->bound, style);
                         CString msg;
                         msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
@@ -271,8 +275,38 @@ void CMapViewView::OnRetrieveClickPolygon() {
     oprType = OPR_RETRIEVE_CLICK_POLYGON;
 }
 
+// 数据检索-检索分类ID
+void CMapViewView::OnRetrieveId() {
+    // TODO: 在此添加命令处理程序代码
+    CancelOpr();
+    CRetrieveIDDialog retrieveIDDlg;
+    if (retrieveIDDlg.DoModal() == IDOK) {
+        int retrieveID = retrieveIDDlg.retriveID;
+        FeatureArray & featureList = GetDocument()->featureList;
+        CMapViewDoc* pDoc = GetDocument();
+        MFStyle style;
+        style.lineColor = RGB(255, 219, 79);
+        style.fillColor = RGB(254, 242, 99);
+        style.lineWidth = 2;
+        style.penStyle = PS_SOLID;
+        CClientDC dc(this);
+        int count = 0;
+        for (int i = 0; i < featureList.GetSize(); i++) {
+            if (featureList[i]->id == retrieveID) {
+                count++;
+                featureList[i]->Draw(dc, pDoc->bound, style);
+            }
+        }
+        CString msg;
+        msg.Format(_T("分类ID：%d，共查到%d个。"), retrieveID, count);
+        MessageBox(msg, _T("检索分类ID"), MB_OK);
+        Invalidate();
+    }
+}
+
 // 取消操作
 void CMapViewView::CancelOpr() {
     oprType = OPR_NONE;
     Invalidate();
 }
+

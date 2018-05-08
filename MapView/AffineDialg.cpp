@@ -31,7 +31,6 @@ CAffineDialg::~CAffineDialg() {
 BOOL CAffineDialg::OnInitDialog() {
     CDialogEx::OnInitDialog();
 
-    // TODO:  在此添加额外的初始化
     CString str;
     str.Format(_T("%.3f"), orgX1);
     SetDlgItemTextW(IDC_AFFINE_ORG_X1, str);
@@ -68,7 +67,6 @@ BOOL CAffineDialg::OnInitDialog() {
 }
 
 void CAffineDialg::OnOK() {
-    // TODO: 在此添加专用代码和/或调用基类
     MVDecoder decoder;
     CString text;
 

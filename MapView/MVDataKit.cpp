@@ -262,6 +262,18 @@ double MVDecoder::ToDouble(CString str) {
     temp = CT2A(str.GetBuffer());
     ss << temp;
     double result;
-    ss >> result;
+    if(!(ss >> result))
+        result = 0.0;
+    return result;
+}
+
+int MVDecoder::ToInt(CString str) {
+    std::string temp;
+    std::stringstream ss;
+    temp = CT2A(str.GetBuffer());
+    ss << temp;
+    int result;
+    if (!(ss >> result))
+        result = 0;
     return result;
 }

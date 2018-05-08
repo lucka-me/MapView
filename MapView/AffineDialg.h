@@ -2,8 +2,7 @@
 
 // CAffineDialg 对话框
 
-class CAffineDialg : public CDialogEx
-{
+class CAffineDialg : public CDialogEx {
 	DECLARE_DYNAMIC(CAffineDialg)
 
 public:

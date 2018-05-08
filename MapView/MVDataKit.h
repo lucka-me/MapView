@@ -152,4 +152,5 @@ public:
     void Decode(CString line, int & a, int & b);
     void Decode(CString line, double & a, double & b);
     double ToDouble(CString str);
+    int ToInt(CString str);
 };
