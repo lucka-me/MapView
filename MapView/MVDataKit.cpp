@@ -62,7 +62,7 @@ MFPoint * MapBound::ConvertToMap(int x, int y) {
 
 // MARK: FeatureArray
 
-bool FeatureArray::HasFeature(MapFeature * pFeature) {
+bool FeatureArray::Has(MapFeature * pFeature) {
     for (int i = 0; i < GetSize(); i++)
         if (GetAt(i) == pFeature)
             return true;
@@ -88,9 +88,13 @@ void MFPoint::Affine(double a1, double b1, double c1, double a2, double b2, doub
     y = a2 * tempX + b2 * tempY + c2;
 }
 
-void MFPoint::Draw(CDC & dc, MapBound & bound, MFStyle style) {
+void MFPoint::Draw(CDC & dc, MapBound & bound) {
+    Draw(dc, bound, style);
+}
+
+void MFPoint::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
     CPoint displayPoint = bound.ConvertToDisplay(x, y);
-    dc.SetPixel(displayPoint.x, displayPoint.y, style.lineColor);
+    dc.SetPixel(displayPoint.x, displayPoint.y, drawStyle.lineColor);
 }
 
 bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
@@ -112,10 +116,14 @@ void MFPolyline::Affine(double a1, double b1, double c1, double a2, double b2, d
         pointList[i]->Affine(a1, b1, c1, a2, b2, c2);
 }
 
-void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle style) {
+void MFPolyline::Draw(CDC & dc, MapBound & bound) {
+    Draw(dc, bound, style);
+}
+
+void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
     CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
     CPen pen;
-    pen.CreatePen(style.penStyle, style.lineWidth, style.lineColor);
+    pen.CreatePen(drawStyle.penStyle, drawStyle.lineWidth, drawStyle.lineColor);
     CPen *pOldPen = dc.SelectObject(&pen);
 
     CPoint * pList = bound.ConvertToDisplay(pointList);
@@ -171,12 +179,16 @@ void MFPolygon::Affine(double a1, double b1, double c1, double a2, double b2, do
         pointList[i]->Affine(a1, b1, c1, a2, b2, c2);
 }
 
-void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle style) {
+void MFPolygon::Draw(CDC & dc, MapBound & bound) {
+    Draw(dc, bound, style);
+}
+
+void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
     CBrush brush;
-    brush.CreateSolidBrush(style.fillColor);
+    brush.CreateSolidBrush(drawStyle.fillColor);
     CGdiObject *pOldBrush = dc.SelectObject(&brush);
     CPen pen;
-    pen.CreatePen(style.penStyle, style.lineWidth, style.lineColor);
+    pen.CreatePen(drawStyle.penStyle, drawStyle.lineWidth, drawStyle.lineColor);
     CPen *pOldPen = dc.SelectObject(&pen);
 
     CPoint * pList = bound.ConvertToDisplay(pointList);

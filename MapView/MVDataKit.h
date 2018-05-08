@@ -45,10 +45,10 @@ public:
 // 要素样式
 class MFStyle {
 public:
-    COLORREF lineColor;
-    COLORREF fillColor;
-    unsigned short lineWidth;
-    int penStyle;
+    COLORREF lineColor = RGB(0, 0, 0);
+    COLORREF fillColor = RGB(255, 255, 255);
+    unsigned short lineWidth = 1;
+    int penStyle = PS_SOLID;
 };
 
 // 要素类数组
@@ -57,7 +57,7 @@ class FeatureArray :
 public:
     FeatureArray() {};
     ~FeatureArray() {};
-    bool HasFeature(MapFeature * pFeature);
+    bool Has(MapFeature * pFeature);
 };
 
 // 要素类
@@ -69,12 +69,14 @@ public:
     virtual ~MapFeature() {};
     virtual FeatureType GetType() { return FT_NONE; };
     virtual void Affine(double a1, double b1, double c1, double a2, double b2, double c2) {};
-    virtual void Draw(CDC & dc, MapBound & bound, MFStyle style) {};
-    virtual bool DidSelected(MFPoint & selectPoint, double buffer = 2) { return false; };
+    virtual void Draw(CDC & dc, MapBound & bound) {};
+    virtual void Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {};
+    virtual bool DidSelected(MFPoint & selectPoint, double buffer = 0.2) { return false; };
     
     // 属性
     int SN; // 序列号
     int id; // 要素分类ID
+    MFStyle style;  // 显示样式
 };
 
 class MFPoint :
@@ -85,8 +87,9 @@ public:
     // 重写方法
     FeatureType GetType() { return FT_POINT; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
-    void Draw(CDC & dc, MapBound & bound, MFStyle style);
-    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
+    void Draw(CDC & dc, MapBound & bound);
+    void Draw(CDC & dc, MapBound & bound, MFStyle drawStyle);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 0.2);
     // 属性
     double x;
     double y;
@@ -100,8 +103,9 @@ public:
     // 重写方法
     FeatureType GetType() { return FT_POLYLINE; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
-    void Draw(CDC & dc, MapBound & bound, MFStyle style);
-    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
+    void Draw(CDC & dc, MapBound & bound);
+    void Draw(CDC & dc, MapBound & bound, MFStyle drawStyle);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 0.2);
     // 新方法
     void Set(MFPoint * startPoint);
     void Add(MFPoint * newPoint);
@@ -117,8 +121,9 @@ public:
     // 重写方法
     FeatureType GetType() { return FT_POLYGON; };
     void Affine(double a1, double b1, double c1, double a2, double b2, double c2);
-    void Draw(CDC & dc, MapBound & bound, MFStyle style);
-    bool DidSelected(MFPoint & selectPoint, double buffer = 2);
+    void Draw(CDC & dc, MapBound & bound);
+    void Draw(CDC & dc, MapBound & bound, MFStyle drawStyle);
+    bool DidSelected(MFPoint & selectPoint, double buffer = 0.2);
     // 新方法
     void Set(MFPoint * startPoint);
     void Add(MFPoint * newPoint);

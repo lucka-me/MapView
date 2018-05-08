@@ -96,6 +96,34 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                     decoder.Decode(line, x, y);
                     newPolyline->Add(new MFPoint(x, y));
                 } while (true);
+                switch (featureID) {
+                    case 10000: {   // 图廓
+                        newPolyline->style.lineColor = RGB(0, 0, 0);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    case 10001: {   // 铁路
+                        newPolyline->style.lineColor = RGB(0, 0, 0);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    case 10003: {   // 汽渡
+                        newPolyline->style.lineColor = RGB(72, 92, 194);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_DASH;
+                        break;
+                    }
+                    case 10004: {   // 主要道路
+                        newPolyline->style.lineColor = RGB(255, 0, 0);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    default:
+                        break;
+                }
                 featureList.Add(newPolyline);
                 break;
             }
@@ -113,6 +141,31 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                     decoder.Decode(line, x, y);
                     newPolyline->Add(new MFPoint(x, y));
                 } while (true);
+                switch (featureID) {
+                    case 20002: {   // 铁路中转站
+                        newPolyline->style.lineColor = RGB(148, 147, 145);
+                        newPolyline->style.fillColor = RGB(171, 169, 164);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    case 20003: {   // 河流、湖泊
+                        newPolyline->style.lineColor = RGB(83, 143, 189);
+                        newPolyline->style.fillColor = RGB(102, 189, 204);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    case 20004: {   // 居民地
+                        newPolyline->style.lineColor = RGB(0, 103, 167);
+                        newPolyline->style.fillColor = RGB(168, 185, 189);
+                        newPolyline->style.lineWidth = 1;
+                        newPolyline->style.penStyle = PS_SOLID;
+                        break;
+                    }
+                    default:
+                        break;
+                }
                 featureList.Add(newPolyline);
                 break;
             }
@@ -121,6 +174,7 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 file.ReadString(line);
                 decoder.Decode(line, x, y);
                 MFPoint * point = new MFPoint(x, y, featureID, SN);
+                point->style.lineColor = RGB(0, 0, 255);
                 featureList.Add(point);
                 controlPointList.Add(point);
                 file.ReadString(line);
@@ -358,7 +412,7 @@ bool CMapViewDoc::DoBuildIndex() {
                     int topRow    = int((top    - bound.mapButtom) / gridIndex.resolution);
                     for (int scanRow = bottomRow; scanRow <= topRow; scanRow++)
                         for (int scanCol = leftCol; scanCol <= rightCol; scanCol++)
-                            if (!gridIndex.index[scanRow][scanCol].HasFeature(polyline))
+                            if (!gridIndex.index[scanRow][scanCol].Has(polyline))
                                 gridIndex.index[scanRow][scanCol].Add(polyline);
 
                 }

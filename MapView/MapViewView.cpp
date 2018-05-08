@@ -98,74 +98,7 @@ void CMapViewView::OnDraw(CDC* pDC)
     memDC.FillSolidRect(0, 0, displayRect.right, displayRect.bottom, RGB(255, 255, 255));
 
     for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
-        MFStyle style;
-        switch (pDoc->featureList[i]->id) {
-            case 10000: {   // 图廓
-                style.lineColor = RGB(0, 0, 0);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 10001: {   // 铁路
-                style.lineColor = RGB(0, 0, 0);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 10003: {   // 汽渡
-                style.lineColor = RGB(72, 92, 194);
-                style.lineWidth = 1;
-                style.penStyle = PS_DASH;
-                break;
-            }
-            case 10004: {   // 主要道路
-                style.lineColor = RGB(255, 0, 0);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 20001: {   // 码头
-                style.lineColor = RGB(72, 92, 194);
-                style.fillColor = RGB(90, 152, 245);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 20002: {   // 铁路中转站
-                style.lineColor = RGB(148, 147, 145);
-                style.fillColor = RGB(171, 169, 164);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 20003: {   // 河流、湖泊
-                style.lineColor = RGB(83, 143, 189);
-                style.fillColor = RGB(102, 189, 204);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 20004: {   // 居民地
-                style.lineColor = RGB(0, 103, 167);
-                style.fillColor = RGB(168, 185, 189);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            case 30000: {   // 控制点
-                style.lineColor = RGB(0, 0, 255);
-                style.penStyle = PS_SOLID;
-                break;
-            }
-            default: {
-                style.lineColor = RGB(255, 255, 255);
-                style.fillColor = RGB(255, 255, 255);
-                style.lineWidth = 1;
-                style.penStyle = PS_SOLID;
-                break;
-            }
-        }
-        pDoc->featureList[i]->Draw(memDC, pDoc->bound, style);
+        pDoc->featureList[i]->Draw(memDC, pDoc->bound);
     }
 
     pDC->BitBlt(0, 0, displayRect.right, displayRect.bottom, &memDC, 0, 0, SRCCOPY);
@@ -216,6 +149,9 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
     MFPoint * mapPoint = pDoc->bound.ConvertToMap(point);
     int row = int((mapPoint->x - pDoc->bound.mapButtom) / pDoc->gridIndex.resolution);
     int col = int((mapPoint->y - pDoc->bound.mapLeft) / pDoc->gridIndex.resolution);
+    if (row < 0 || row > pDoc->gridIndex.row ||
+        col < 0 || col > pDoc->gridIndex.col)
+        return;
 
     switch (oprType) {
         case OPR_RETRIEVE_CLICK_POINT: {
@@ -232,24 +168,36 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             break;
         }
         case OPR_RETRIEVE_CLICK_POLYLINE: {
-            int count = 0;
             for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYLINE) {
-                    count++;
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        MFStyle style;
+                        CClientDC dc(this);
+                        style.lineColor = RGB(255, 219, 79);
+                        style.lineWidth = 2;
+                        style.penStyle = PS_SOLID;
+                        pDoc->gridIndex.index[row][col][i]->Draw(dc, pDoc->bound, style);
                         CString msg;
                         msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
                         MessageBox(msg, _T("点击检索 - 线"), MB_OK);
+                        Invalidate();
                         break;
                     }
                 }
             }
-            CString msg;
-            msg.Format(_T("在(%d, %d)中有%d个线"), row, col, count);
-            MessageBox(msg, _T("点击检索 - 线"), MB_OK);
             break;
         }
         case OPR_RETRIEVE_CLICK_POLYGON: {
+            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+                if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYGON) {
+                    if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        CString msg;
+                        msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
+                        MessageBox(msg, _T("点击检索 - 面"), MB_OK);
+                        break;
+                    }
+                }
+            }
             break;
         }
         default:
