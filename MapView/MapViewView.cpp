@@ -156,6 +156,12 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
         col < 0 || col > pDoc->gridIndex.col)
         return;
 
+    MFStyle style;
+    style.lineColor = RGB(255, 219, 79);
+    style.fillColor = RGB(254, 242, 99);
+    style.lineWidth = 2;
+    style.penStyle = PS_SOLID;
+
     switch (oprType) {
         case OPR_RETRIEVE_CLICK_POINT: {
             for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
@@ -174,11 +180,6 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYLINE) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
-                        MFStyle style;
-                        style.lineColor = RGB(255, 219, 79);
-                        style.fillColor = RGB(254, 242, 99);
-                        style.lineWidth = 2;
-                        style.penStyle = PS_SOLID;
                         CClientDC dc(this);
                         pDoc->gridIndex.index[row][col][i]->Draw(dc, pDoc->bound, style);
                         CString msg;
@@ -195,9 +196,12 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYGON) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        CClientDC dc(this);
+                        pDoc->gridIndex.index[row][col][i]->Draw(dc, pDoc->bound, style);
                         CString msg;
                         msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
                         MessageBox(msg, _T("点击检索 - 面"), MB_OK);
+                        Invalidate();
                         break;
                     }
                 }

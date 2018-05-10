@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MVDataKit.h"
 #include <sstream>
-
+# define M_PI 3.14159265358979323846  /* pi */
 // MARK: MapBound
 
 MapBound::MapBound() {
@@ -134,7 +134,6 @@ void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
 }
 
 bool MFPolyline::DidSelected(MFPoint & selectPoint, double buffer) {
-    bool result = false;
     for (int i = 1; i < pointList.GetSize(); i++) {
         MFPoint * pointA = (MFPoint *)pointList[i - 1];
         MFPoint * pointB = (MFPoint *)pointList[i];
@@ -150,12 +149,12 @@ bool MFPolyline::DidSelected(MFPoint & selectPoint, double buffer) {
             double B = pointB->x - pointA->x;
             double C = pointA->x * pointB->y - pointB->x * pointA->y;
             if (fabs((A * selectPoint.x + B * selectPoint.y + C) / sqrt(A * A + B * B)) <= buffer) {
-                result = true;
+                return true;
                 break;
             }
         }
     }
-    return result;
+    return false;
 }
 
 void MFPolyline::Set(MFPoint * startPoint) {
@@ -199,19 +198,61 @@ void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
 }
 
 bool MFPolygon::DidSelected(MFPoint & selectPoint, double buffer) {
-    bool result = false;
-    MFPoint * pointA = (MFPoint *)pointList[pointList.GetSize() - 1];
-    MFPoint * pointB = (MFPoint *)pointList[0];
-    double angleSum = atan((pointA->y - selectPoint.y) / (pointA->x - selectPoint.x)) 
-                    - atan((pointB->y - selectPoint.y) / (pointB->x - selectPoint.x));
+    // 先判断在不在边界上
     for (int i = 1; i < pointList.GetSize(); i++) {
         MFPoint * pointA = (MFPoint *)pointList[i - 1];
         MFPoint * pointB = (MFPoint *)pointList[i];
-        angleSum += atan((pointA->y - selectPoint.y) / (pointA->x - selectPoint.x))
-                  - atan((pointB->y - selectPoint.y) / (pointB->x - selectPoint.x));
+        double left = pointA->y < pointB->y ? pointA->y : pointB->y;
+        double bottom = pointA->x < pointB->x ? pointA->x : pointB->x;
+        double right = pointA->y > pointB->y ? pointA->y : pointB->y;
+        double top = pointA->x > pointB->x ? pointA->x : pointB->x;
+        if ((selectPoint.y > left - buffer) &&
+            (selectPoint.x > bottom - buffer) &&
+            (selectPoint.y < right + buffer) &&
+            (selectPoint.x < top + buffer)) {
+            double A = pointA->y - pointB->y;
+            double B = pointB->x - pointA->x;
+            double C = pointA->x * pointB->y - pointB->x * pointA->y;
+            if (fabs((A * selectPoint.x + B * selectPoint.y + C) / sqrt(A * A + B * B)) <= buffer)
+                return true;
+
+        }
     }
-    return angleSum < REAL_EPSILON;
+
+    MFPoint * lastPoint = (MFPoint *)pointList[pointList.GetSize() - 1];
+    MFPoint * firstPoint = (MFPoint *)pointList[0];
+    double dxA = lastPoint->x - selectPoint.x;
+    double dyA = lastPoint->y - selectPoint.y;
+    double dxB = firstPoint->x - selectPoint.x;
+    double dyB = firstPoint->y - selectPoint.y;
+    double radianA = atan2(dxA, dyA);
+    double radianB = atan2(dxB, dyB);
+    double angle = radianB - radianA;
+    if (angle > M_PI) {
+        angle = angle - 2 * M_PI;
+    } else if (angle < -M_PI) {
+        angle = angle + 2 * M_PI;
+    }
+    double angleSum = angle;
+    for (int i = 1; i < pointList.GetSize(); i++) {
+        MFPoint * pointA = (MFPoint *)pointList[i - 1];
+        MFPoint * pointB = (MFPoint *)pointList[i];
+        dxA = pointA->x - selectPoint.x;
+        dyA = pointA->y - selectPoint.y;
+        dxB = pointB->x - selectPoint.x;
+        dyB = pointB->y - selectPoint.y;
+        radianA = atan2(dxA, dyA);
+        radianB = atan2(dxB, dyB);
+        angle = radianB - radianA;
+        if (angle > M_PI) {
+            angle = angle - 2 * M_PI;
+        } else if (angle < -M_PI) {
+            angle = angle + 2 * M_PI;
+        }
+        angleSum += angle;
+    }
     
+    return !(fabs(angleSum) < REAL_EPSILON);
 }
 
 void MFPolygon::Set(MFPoint * startPoint) {

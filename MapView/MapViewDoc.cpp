@@ -420,6 +420,25 @@ bool CMapViewDoc::DoBuildIndex() {
             }
             case FT_POLYGON: {
                 MFPolygon * polygon = (MFPolygon *)featureList[i];
+                MFPoint * firstPoint = (MFPoint *)polygon->pointList[0];
+                double left   = firstPoint->y;
+                double bottom = firstPoint->x;
+                double right  = firstPoint->y;
+                double top    = firstPoint->x;
+                for (int scan = 1; scan < polygon->pointList.GetSize(); scan++) {
+                    MFPoint * point = (MFPoint *)polygon->pointList[scan];
+                    left   = point->y < left   ? point->y : left;
+                    bottom = point->x < bottom ? point->x : bottom;
+                    right  = point->y > right  ? point->y : right;
+                    top    = point->x > top    ? point->x : top;
+                }
+                int leftCol   = int((left   - bound.mapLeft)   / gridIndex.resolution);
+                int bottomRow = int((bottom - bound.mapButtom) / gridIndex.resolution);
+                int rightCol  = int((right  - bound.mapLeft)   / gridIndex.resolution);
+                int topRow    = int((top    - bound.mapButtom) / gridIndex.resolution);
+                for (int scanRow = bottomRow; scanRow <= topRow; scanRow++)
+                    for (int scanCol = leftCol; scanCol <= rightCol; scanCol++)
+                        gridIndex.index[scanRow][scanCol].Add(polygon);
                 break;
             }
             default:
