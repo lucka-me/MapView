@@ -45,6 +45,9 @@
     <ClInclude Include="RetrieveIDDialog.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="GridIndexDialog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MapView.cpp">
@@ -69,6 +72,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RetrieveIDDialog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GridIndexDialog.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

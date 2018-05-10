@@ -16,6 +16,7 @@
 #define IDS_EDIT_MENU                   306
 #define IDD_AFFINEBOX                   313
 #define IDD_RETRIEVEIDBOX               315
+#define IDD_GRIDBOX                     317
 #define IDC_AFFINE_SET_X1               1006
 #define IDC_AFFINE_SET_Y1               1007
 #define IDC_AFFINE_SET_X2               1008
@@ -29,6 +30,8 @@
 #define IDC_AFFINE_ORG_X3               1016
 #define IDC_AFFINE_ORG_Y3               1017
 #define IDC_RETRIEVE_ID_EDIT            1018
+#define IDC_EDIT1                       1020
+#define IDC_GRID_RESOLUTION_EDIT        1020
 #define ID_BUILD_INDEX                  32772
 #define ID_32775                        32775
 #define ID_AFF                          32776
@@ -50,9 +53,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        317
+#define _APS_NEXT_RESOURCE_VALUE        319
 #define _APS_NEXT_COMMAND_VALUE         32789
-#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_CONTROL_VALUE         1021
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

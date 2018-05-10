@@ -184,6 +184,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AffineDialg.h" />
+    <ClInclude Include="GridIndexDialog.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MapView.h" />
     <ClInclude Include="MapViewDoc.h" />
@@ -196,6 +197,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AffineDialg.cpp" />
+    <ClCompile Include="GridIndexDialog.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MapView.cpp" />
     <ClCompile Include="MapViewDoc.cpp" />

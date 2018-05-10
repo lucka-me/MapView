@@ -219,6 +219,7 @@ bool MFPolygon::DidSelected(MFPoint & selectPoint, double buffer) {
         }
     }
 
+    // 再判断在不在多边形内
     MFPoint * lastPoint = (MFPoint *)pointList[pointList.GetSize() - 1];
     MFPoint * firstPoint = (MFPoint *)pointList[0];
     double dxA = lastPoint->x - selectPoint.x;

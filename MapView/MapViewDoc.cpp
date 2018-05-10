@@ -12,6 +12,7 @@
 #include "MapViewDoc.h"
 #include "MainFrm.h"
 #include "AffineDialg.h"
+#include "GridIndexDialog.h"
 
 #include <propkey.h>
 
@@ -385,6 +386,12 @@ bool CMapViewDoc::DoBuildIndex() {
     pFrame->m_wndStatusBar.SetPaneText(0, _T("建立索引中"));
 
     double gridResolution = 5.0; // 网格分辨率
+    CGridIndexDialog gridIndexDlg;
+    if (gridIndexDlg.DoModal() == IDOK)
+        gridResolution = gridIndexDlg.resolution;
+    else
+        return false;
+
     gridIndex.Set(gridResolution, bound);
     
     for (int i = 0; i < featureList.GetSize(); i++) {
