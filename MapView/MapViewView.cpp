@@ -100,9 +100,31 @@ void CMapViewView::OnDraw(CDC* pDC)
     CBitmap *pOldBit = memDC.SelectObject(&memBitmap);
     memDC.FillSolidRect(0, 0, displayRect.right, displayRect.bottom, RGB(255, 255, 255));
 
+    // 绘图
     for (int i = 0; i < pDoc->featureList.GetSize(); i++) {
         pDoc->featureList[i]->Draw(memDC, pDoc->bound);
     }
+
+    // 绘制格网
+    CGdiObject *pOldBrush = memDC.SelectStockObject(NULL_BRUSH);
+    CPen pen;
+    pen.CreatePen(PS_SOLID, 1, RGB(180, 180, 180));
+    CPen *pOldPen = memDC.SelectObject(&pen);
+    
+    double displayGridSize = double(pDoc->bound.displayButtom - pDoc->bound.displayTop) / pDoc->gridIndex.row;
+    int gridRight = pDoc->bound.displayLeft + int(floor(pDoc->gridIndex.col * displayGridSize));
+    for (int i = 0; i <= pDoc->gridIndex.row; i++) {
+        memDC.MoveTo(pDoc->bound.displayLeft, pDoc->bound.displayTop + int(floor(i * displayGridSize)));
+        memDC.LineTo(gridRight, pDoc->bound.displayTop + int(floor(i * displayGridSize)));
+    }
+    int gridTop = pDoc->bound.displayButtom - int(floor(pDoc->gridIndex.row * displayGridSize));
+    for (int i = pDoc->gridIndex.col; i >= 0; i--) {
+        memDC.MoveTo(pDoc->bound.displayLeft + int(floor(i * displayGridSize)), gridTop);
+        memDC.LineTo(pDoc->bound.displayLeft + int(floor(i * displayGridSize)), pDoc->bound.displayButtom);
+    }
+
+    memDC.SelectObject(pOldPen);
+    memDC.SelectObject(pOldBrush);
 
     pDC->BitBlt(0, 0, displayRect.right, displayRect.bottom, &memDC, 0, 0, SRCCOPY);
     memBitmap.DeleteObject();
@@ -164,7 +186,7 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
 
     switch (oprType) {
         case OPR_RETRIEVE_CLICK_POINT: {
-            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+            for (int i = pDoc->gridIndex.index[row][col].GetSize() - 1; i >= 0; i--) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POINT) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
                         CString msg;
@@ -177,7 +199,7 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             break;
         }
         case OPR_RETRIEVE_CLICK_POLYLINE: {
-            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+            for (int i = pDoc->gridIndex.index[row][col].GetSize() - 1; i >= 0; i--) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYLINE) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
                         CClientDC dc(this);
@@ -193,7 +215,7 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             break;
         }
         case OPR_RETRIEVE_CLICK_POLYGON: {
-            for (int i = 0; i < pDoc->gridIndex.index[row][col].GetSize(); i++) {
+            for (int i = pDoc->gridIndex.index[row][col].GetSize() - 1; i >= 0; i--) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POLYGON) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
                         CClientDC dc(this);
