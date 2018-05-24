@@ -33,20 +33,16 @@
 #define IDC_EDIT1                       1020
 #define IDC_GRID_RESOLUTION_EDIT        1020
 #define ID_BUILD_INDEX                  32772
-#define ID_32775                        32775
 #define ID_AFF                          32776
 #define ID_AFFINE                       32777
 #define ID_DATA_AFFINE                  32778
 #define ID_DATA_BUILD_INDEX             32779
-#define ID_32780                        32780
-#define ID_32781                        32781
-#define ID_32782                        32782
 #define ID_Menu                         32783
 #define ID_RETRIEVE_CLICK_POINT         32784
 #define ID_RETRIEVE_CLICK_POLYLINE      32785
 #define ID_RETRIEVE_CLICK_POLYGON       32786
-#define ID_32787                        32787
 #define ID_RETRIEVE_ID                  32788
+#define ID_VIEW_ZOOM                    32790
 #define ID_INDICATOR_PROGRESS           59142
 
 // Next default values for new objects
@@ -54,7 +50,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        319
-#define _APS_NEXT_COMMAND_VALUE         32789
+#define _APS_NEXT_COMMAND_VALUE         32791
 #define _APS_NEXT_CONTROL_VALUE         1021
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

@@ -37,6 +37,8 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYGON, &CMapViewView::OnRetrieveClickPolygon)
     ON_WM_LBUTTONDOWN()
     ON_COMMAND(ID_RETRIEVE_ID, &CMapViewView::OnRetrieveId)
+    ON_COMMAND(ID_VIEW_ZOOM, &CMapViewView::OnViewZoom)
+    ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -75,22 +77,25 @@ void CMapViewView::OnDraw(CDC* pDC)
     // 确定显示范围
     CRect displayRect;
     GetClientRect(&displayRect);
-    // 对比纵横比
-    double displayRatio = double(displayRect.Height()) / displayRect.Width();
-    double mapRatio = pDoc->bound.MapHeight() / pDoc->bound.MapWidth();
-    if (displayRatio > mapRatio) {
-        int displayHeightHalf = int(displayRect.Width() * 0.9 * mapRatio / 2);
-        pDoc->bound.SetDisplay(int(displayRect.Width() * 0.05),
-                               int(displayRect.Height() / 2 + displayHeightHalf),
-                               int(displayRect.Width() * 0.95),
-                               int(displayRect.Height() / 2 - displayHeightHalf));
-    } else {
-        int displayWidthHalf = int(displayRect.Height() * 0.9 / mapRatio / 2);
-        pDoc->bound.SetDisplay(int(displayRect.Width() / 2 - displayWidthHalf),
-                               int(displayRect.Height() * 0.95),
-                               int(displayRect.Width() / 2 + displayWidthHalf),
-                               int(displayRect.Height() * 0.05));
+    if (isDisplayDefault) {
+        // 对比纵横比
+        double displayRatio = double(displayRect.Height()) / displayRect.Width();
+        double mapRatio = pDoc->bound.MapHeight() / pDoc->bound.MapWidth();
+        if (displayRatio > mapRatio) {
+            int displayHeightHalf = int(displayRect.Width() * 0.9 * mapRatio / 2);
+            pDoc->bound.SetDisplay(int(displayRect.Width() * 0.05),
+                int(displayRect.Height() / 2 + displayHeightHalf),
+                int(displayRect.Width() * 0.95),
+                int(displayRect.Height() / 2 - displayHeightHalf));
+        } else {
+            int displayWidthHalf = int(displayRect.Height() * 0.9 / mapRatio / 2);
+            pDoc->bound.SetDisplay(int(displayRect.Width() / 2 - displayWidthHalf),
+                int(displayRect.Height() * 0.95),
+                int(displayRect.Width() / 2 + displayWidthHalf),
+                int(displayRect.Height() * 0.05));
+        }
     }
+    
 
     // 双缓存
     CDC memDC;
@@ -237,6 +242,34 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
     CView::OnLButtonDown(nFlags, point);
 }
 
+BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+    switch (oprType) {
+    case OPR_VIEW_ZOOM: {
+        CMapViewDoc* pDoc = GetDocument();
+        double level = 1.0;
+        if (zDelta > 0) {
+            // 缩小
+            level = 0.9;
+        } else if (zDelta < 0) {
+            // 放大
+            level = 1.1;
+        }
+        pDoc->bound.displayLeft   = pt.x + int((pDoc->bound.displayLeft   - pt.x) * level);
+        pDoc->bound.displayButtom = pt.y + int((pDoc->bound.displayButtom - pt.y) * level);
+        pDoc->bound.displayRight  = pt.x + int((pDoc->bound.displayRight  - pt.x) * level);
+        pDoc->bound.displayTop    = pt.y + int((pDoc->bound.displayTop    - pt.y) * level);
+        isDisplayDefault = false;
+        Invalidate();
+        break;
+    }
+    default:
+        break;
+    }
+
+
+    return CView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
 void CMapViewView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 {
 #ifndef SHARED_HANDLERS
@@ -289,21 +322,18 @@ void CMapViewView::OnRetrieveClickPoint() {
 
 // 数据检索-点选检索-线
 void CMapViewView::OnRetrieveClickPolyline() {
-    // TODO: 在此添加命令处理程序代码
     CancelOpr();
     oprType = OPR_RETRIEVE_CLICK_POLYLINE;
 }
 
 // 数据检索-点选检索-面
 void CMapViewView::OnRetrieveClickPolygon() {
-    // TODO: 在此添加命令处理程序代码
     CancelOpr();
     oprType = OPR_RETRIEVE_CLICK_POLYGON;
 }
 
 // 数据检索-检索分类ID
 void CMapViewView::OnRetrieveId() {
-    // TODO: 在此添加命令处理程序代码
     CancelOpr();
     CRetrieveIDDialog retrieveIDDlg;
     if (retrieveIDDlg.DoModal() == IDOK) {
@@ -336,3 +366,8 @@ void CMapViewView::CancelOpr() {
     Invalidate();
 }
 
+void CMapViewView::OnViewZoom() {
+    // TODO: 在此添加命令处理程序代码
+    CancelOpr();
+    oprType = OPR_VIEW_ZOOM;
+}

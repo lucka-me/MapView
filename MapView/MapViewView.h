@@ -17,15 +17,20 @@ public:
 
 // 操作
 public:
+    // 方法
+    void CancelOpr();
+
+public:
+    // 属性
     // 操作类型
     enum Operation {
         OPR_NONE,   // 无操作
         OPR_RETRIEVE_CLICK_POINT,       // 点击检索-点
         OPR_RETRIEVE_CLICK_POLYLINE,    // 点击检索-线
         OPR_RETRIEVE_CLICK_POLYGON,     // 点击检索-面
+        OPR_VIEW_ZOOM,   // 缩放
     } oprType;
-    // 方法
-    void CancelOpr();
+    bool isDisplayDefault = true;
 
 // 重写
 public:
@@ -61,6 +66,8 @@ public:
     afx_msg void OnRetrieveClickPolygon();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     afx_msg void OnRetrieveId();
+    afx_msg void OnViewZoom();
+    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

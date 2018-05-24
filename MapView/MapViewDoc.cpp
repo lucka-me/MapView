@@ -374,7 +374,7 @@ bool CMapViewDoc::DoAffine() {
     }
     bound.SetMap(left, buttom, right, top);
     
-    return true;//DoBuildIndex();
+    return true;
 }
 
 // 建立索引

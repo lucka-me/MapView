@@ -281,6 +281,7 @@ void GridIndex::Set(double setResolution, MapBound & bound) {
 // MARK: MVDecoder
 
 void MVDecoder::Decode(CString line, int & a, int & b) {
+    // 解码整数对数据
     std::string str;
     std::stringstream ss;
     line.Replace(TEXT(","), TEXT(" "));
@@ -290,6 +291,7 @@ void MVDecoder::Decode(CString line, int & a, int & b) {
 }
 
 void MVDecoder::Decode(CString line, double & a, double & b) {
+    // 解码浮点数对数据
     std::string str;
     std::stringstream ss;
     line.Replace(TEXT(","), TEXT(" "));
@@ -299,6 +301,7 @@ void MVDecoder::Decode(CString line, double & a, double & b) {
 }
 
 double MVDecoder::ToDouble(CString str) {
+    // 解码浮点数
     std::string temp;
     std::stringstream ss;
     temp = CT2A(str.GetBuffer());
@@ -310,6 +313,7 @@ double MVDecoder::ToDouble(CString str) {
 }
 
 int MVDecoder::ToInt(CString str) {
+    // 解码整数
     std::string temp;
     std::stringstream ss;
     temp = CT2A(str.GetBuffer());
