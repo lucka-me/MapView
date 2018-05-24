@@ -160,6 +160,22 @@ BEGIN
     END
 END
 
+IDR_POPUP MENU
+BEGIN
+    POPUP "操作"
+    BEGIN
+        POPUP "点击查询"
+        BEGIN
+            MENUITEM "点",                           ID_RETRIEVE_CLICK_POINT
+            MENUITEM "线",                           ID_RETRIEVE_CLICK_POLYLINE
+            MENUITEM "面",                           ID_RETRIEVE_CLICK_POLYGON
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "移动",                          ID_VIEW_MOVE
+        MENUITEM "复原",                          ID_VIEW_RESTORE
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

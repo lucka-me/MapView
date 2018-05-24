@@ -17,6 +17,10 @@
 #define IDD_AFFINEBOX                   313
 #define IDD_RETRIEVEIDBOX               315
 #define IDD_GRIDBOX                     317
+#define IDR_MENU1                       319
+#define IDR_MENU2                       320
+#define IDR_MENU_CONTEXT                320
+#define IDR_POPUP                       321
 #define IDC_AFFINE_SET_X1               1006
 #define IDC_AFFINE_SET_Y1               1007
 #define IDC_AFFINE_SET_X2               1008
@@ -43,9 +47,7 @@
 #define ID_RETRIEVE_CLICK_POLYGON       32786
 #define ID_RETRIEVE_ID                  32788
 #define ID_VIEW_ZOOM                    32790
-#define ID_32791                        32791
 #define ID_VIEW_RESTORE                 32792
-#define ID_32793                        32793
 #define ID_VIEW_MOVE                    32794
 #define ID_INDICATOR_PROGRESS           59142
 
@@ -53,8 +55,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        319
-#define _APS_NEXT_COMMAND_VALUE         32795
+#define _APS_NEXT_RESOURCE_VALUE        322
+#define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1021
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

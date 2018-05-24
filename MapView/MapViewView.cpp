@@ -25,41 +25,41 @@ IMPLEMENT_DYNCREATE(CMapViewView, CView)
 
 BEGIN_MESSAGE_MAP(CMapViewView, CView)
 	// 标准打印命令
-	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMapViewView::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
+    ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+    ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+    ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMapViewView::OnFilePrintPreview)
+
+    ON_WM_ERASEBKGND()
+    ON_WM_CONTEXTMENU()
+
     ON_COMMAND(ID_DATA_AFFINE, &CMapViewView::OnDataAffine)
     ON_COMMAND(ID_DATA_BUILD_INDEX, &CMapViewView::OnDataBuildIndex)
     ON_COMMAND(ID_RETRIEVE_CLICK_POINT, &CMapViewView::OnRetrieveClickPoint)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYLINE, &CMapViewView::OnRetrieveClickPolyline)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYGON, &CMapViewView::OnRetrieveClickPolygon)
-    ON_WM_LBUTTONDOWN()
     ON_COMMAND(ID_RETRIEVE_ID, &CMapViewView::OnRetrieveId)
-    ON_WM_MOUSEWHEEL()
     ON_COMMAND(ID_VIEW_RESTORE, &CMapViewView::OnViewRestore)
     ON_COMMAND(ID_VIEW_MOVE, &CMapViewView::OnViewMove)
+
+    ON_WM_LBUTTONDOWN()
+    ON_WM_LBUTTONUP()
+    ON_WM_RBUTTONUP()
     ON_WM_MOUSEMOVE()
-//    ON_WM_NCLBUTTONUP()
-ON_WM_LBUTTONUP()
-ON_WM_ERASEBKGND()
+    ON_WM_MOUSEWHEEL()
+
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
 
-CMapViewView::CMapViewView()
-{
+CMapViewView::CMapViewView() {
 	// TODO: 在此处添加构造代码
 
 }
 
-CMapViewView::~CMapViewView()
-{
+CMapViewView::~CMapViewView() {
 }
 
-BOOL CMapViewView::PreCreateWindow(CREATESTRUCT& cs)
-{
+BOOL CMapViewView::PreCreateWindow(CREATESTRUCT& cs) {
 	// TODO: 在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
 
@@ -68,8 +68,7 @@ BOOL CMapViewView::PreCreateWindow(CREATESTRUCT& cs)
 
 // CMapViewView 绘图
 
-void CMapViewView::OnDraw(CDC* pDC)
-{
+void CMapViewView::OnDraw(CDC* pDC) {
 	CMapViewDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
@@ -152,34 +151,23 @@ BOOL CMapViewView::OnEraseBkgnd(CDC* pDC) {
 // CMapViewView 打印
 
 
-void CMapViewView::OnFilePrintPreview()
-{
+void CMapViewView::OnFilePrintPreview() {
 #ifndef SHARED_HANDLERS
 	AFXPrintPreview(this);
 #endif
 }
 
-BOOL CMapViewView::OnPreparePrinting(CPrintInfo* pInfo)
-{
+BOOL CMapViewView::OnPreparePrinting(CPrintInfo* pInfo) {
 	// 默认准备
 	return DoPreparePrinting(pInfo);
 }
 
-void CMapViewView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
-{
+void CMapViewView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/) {
 	// TODO: 添加额外的打印前进行的初始化过程
 }
 
-void CMapViewView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
-{
+void CMapViewView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/) {
 	// TODO: 添加打印后进行的清理过程
-}
-
-void CMapViewView::OnRButtonUp(UINT /* nFlags */, CPoint point)
-{
-	//ClientToScreen(&point);
-	//OnContextMenu(this, point);
-    CancelOpr();
 }
 
 void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
@@ -254,8 +242,6 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
         }
         case OPR_VIEW_MOVE: {
             lastMovePoint = point;
-            HCURSOR cursor = LoadCursor(NULL, IDC_HAND);
-            SetCursor(cursor);
             didMoveBegin = true;
             break;
         }
@@ -285,6 +271,15 @@ void CMapViewView::OnLButtonUp(UINT nFlags, CPoint point) {
     }
 
     CView::OnLButtonUp(nFlags, point);
+}
+
+void CMapViewView::OnRButtonUp(UINT /* nFlags */, CPoint point) {
+    if (oprType == OPR_NONE) {
+        ClientToScreen(&point);
+        OnContextMenu(this, point);
+    } else {
+        CancelOpr();
+    }
 }
 
 void CMapViewView::OnMouseMove(UINT nFlags, CPoint point) {
@@ -334,7 +329,9 @@ BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 void CMapViewView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 {
 #ifndef SHARED_HANDLERS
-	
+    CMenu menu;
+    menu.LoadMenuW(IDR_POPUP);
+    menu.GetSubMenu(0)->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RIGHTBUTTON, point.x, point.y, this);
 #endif
 }
 
