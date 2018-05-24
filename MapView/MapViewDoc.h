@@ -56,4 +56,5 @@ protected:
 public:
     bool DoAffine();
     bool DoBuildIndex();
+    void SetStatusBarText(CString msg);
 };

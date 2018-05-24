@@ -326,8 +326,9 @@ BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-void CMapViewView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
-{
+void CMapViewView::OnContextMenu(CWnd* /* pWnd */, CPoint point) {
+    // 添加右键菜单
+    //   Reference: https://blog.csdn.net/Tan_HandSome/article/details/47312553
 #ifndef SHARED_HANDLERS
     CMenu menu;
     menu.LoadMenuW(IDR_POPUP);
@@ -375,18 +376,21 @@ void CMapViewView::OnDataBuildIndex() {
 // 数据检索-点选检索-点
 void CMapViewView::OnRetrieveClickPoint() {
     CancelOpr();
+    GetDocument()->SetStatusBarText(_T("点选检索-点"));
     oprType = OPR_RETRIEVE_CLICK_POINT;
 }
 
 // 数据检索-点选检索-线
 void CMapViewView::OnRetrieveClickPolyline() {
     CancelOpr();
+    GetDocument()->SetStatusBarText(_T("点选检索-线"));
     oprType = OPR_RETRIEVE_CLICK_POLYLINE;
 }
 
 // 数据检索-点选检索-面
 void CMapViewView::OnRetrieveClickPolygon() {
     CancelOpr();
+    GetDocument()->SetStatusBarText(_T("点选检索-面"));
     oprType = OPR_RETRIEVE_CLICK_POLYGON;
 }
 
@@ -421,6 +425,7 @@ void CMapViewView::OnRetrieveId() {
 // 取消操作
 void CMapViewView::CancelOpr() {
     oprType = OPR_NONE;
+    GetDocument()->SetStatusBarText(_T("就绪"));
     Invalidate();
 }
 
@@ -434,6 +439,7 @@ void CMapViewView::OnViewRestore() {
 // 视图-移动
 void CMapViewView::OnViewMove() {
     CancelOpr();
+    GetDocument()->SetStatusBarText(_T("移动"));
     didMoveBegin = false;
     oprType = OPR_VIEW_MOVE;
 }

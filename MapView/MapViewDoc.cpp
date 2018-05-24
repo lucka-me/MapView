@@ -297,7 +297,7 @@ bool CMapViewDoc::DoAffine() {
     CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
-    pFrame->m_wndStatusBar.SetPaneText(0, _T("仿射变换处理中"));
+    SetStatusBarText(_T("仿射变换处理中"));
 
     if (controlPointList.GetSize() < 3) {
         AfxMessageBox(_T("控制点不足3个，无法进行仿射变换"), MB_OK | MB_ICONWARNING);
@@ -341,7 +341,7 @@ bool CMapViewDoc::DoAffine() {
     // 确定图幅
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
-    pFrame->m_wndStatusBar.SetPaneText(0, _T("确定图幅中"));
+    SetStatusBarText(_T("确定图幅中"));
 
     double left, bottom, right, top;
     bottom = controlPointList[0]->x;
@@ -396,7 +396,7 @@ bool CMapViewDoc::DoBuildIndex() {
     CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
     pFrame->m_wndStatusBar.EnablePaneProgressBar(1, featureList.GetSize() - 1, TRUE);
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
-    pFrame->m_wndStatusBar.SetPaneText(0, _T("建立索引中"));
+    SetStatusBarText(_T("建立索引中"));
 
     double gridResolution = 5.0; // 网格分辨率
     CGridIndexDialog gridIndexDlg;
@@ -469,4 +469,10 @@ bool CMapViewDoc::DoBuildIndex() {
     }
 
     return true;
+}
+
+
+void CMapViewDoc::SetStatusBarText(CString msg) {
+    CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
+    pFrame->m_wndStatusBar.SetPaneText(0, msg);
 }

@@ -29,7 +29,7 @@ public:
         OPR_RETRIEVE_CLICK_POLYLINE,    // 点击检索-线
         OPR_RETRIEVE_CLICK_POLYGON,     // 点击检索-面
         OPR_VIEW_MOVE,  // 视图-移动
-    } oprType;
+    } oprType = OPR_NONE;
     bool isDisplayDefault = true;
     CPoint lastMovePoint;
     bool didMoveBegin = false;
