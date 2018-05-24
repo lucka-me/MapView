@@ -28,9 +28,11 @@ public:
         OPR_RETRIEVE_CLICK_POINT,       // 点击检索-点
         OPR_RETRIEVE_CLICK_POLYLINE,    // 点击检索-线
         OPR_RETRIEVE_CLICK_POLYGON,     // 点击检索-面
-        OPR_VIEW_ZOOM,   // 缩放
+        OPR_VIEW_MOVE,  // 视图-移动
     } oprType;
     bool isDisplayDefault = true;
+    CPoint lastMovePoint;
+    bool didMoveBegin = false;
 
 // 重写
 public:
@@ -58,17 +60,22 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	DECLARE_MESSAGE_MAP()
 public:
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
     
     afx_msg void OnDataAffine();
     afx_msg void OnDataBuildIndex();
     afx_msg void OnRetrieveClickPoint();
     afx_msg void OnRetrieveClickPolyline();
     afx_msg void OnRetrieveClickPolygon();
-    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     afx_msg void OnRetrieveId();
-    afx_msg void OnViewZoom();
-    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnViewMove();
     afx_msg void OnViewRestore();
+
+    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+    afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

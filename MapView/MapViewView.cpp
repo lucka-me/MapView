@@ -37,9 +37,13 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
     ON_COMMAND(ID_RETRIEVE_CLICK_POLYGON, &CMapViewView::OnRetrieveClickPolygon)
     ON_WM_LBUTTONDOWN()
     ON_COMMAND(ID_RETRIEVE_ID, &CMapViewView::OnRetrieveId)
-    ON_COMMAND(ID_VIEW_ZOOM, &CMapViewView::OnViewZoom)
     ON_WM_MOUSEWHEEL()
     ON_COMMAND(ID_VIEW_RESTORE, &CMapViewView::OnViewRestore)
+    ON_COMMAND(ID_VIEW_MOVE, &CMapViewView::OnViewMove)
+    ON_WM_MOUSEMOVE()
+//    ON_WM_NCLBUTTONUP()
+ON_WM_LBUTTONUP()
+ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -137,6 +141,13 @@ void CMapViewView::OnDraw(CDC* pDC)
     memDC.DeleteDC();
 }
 
+// 双缓存不擦除背景
+BOOL CMapViewView::OnEraseBkgnd(CDC* pDC) {
+    // TODO: 在此添加消息处理程序代码和/或调用默认值
+
+    return TRUE;//CView::OnEraseBkgnd(pDC);
+}
+
 
 // CMapViewView 打印
 
@@ -186,9 +197,12 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
 
     MFStyle style;
     style.bottomLineColor = RGB(255, 219, 79);
+    style.topLineColor = RGB(255, 219, 79);
     style.fillColor = RGB(254, 242, 99);
-    style.bottomLineWidth = 2;
+    style.bottomLineWidth = 4;
+    style.topLineWidth = 2;
     style.bottomPenStyle = PS_SOLID;
+    style.topPenStyle = PS_SOLID;
 
     switch (oprType) {
         case OPR_RETRIEVE_CLICK_POINT: {
@@ -238,6 +252,13 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
             }
             break;
         }
+        case OPR_VIEW_MOVE: {
+            lastMovePoint = point;
+            HCURSOR cursor = LoadCursor(NULL, IDC_HAND);
+            SetCursor(cursor);
+            didMoveBegin = true;
+            break;
+        }
         default:
             break;
     }
@@ -245,30 +266,67 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
     CView::OnLButtonDown(nFlags, point);
 }
 
-BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+void CMapViewView::OnLButtonUp(UINT nFlags, CPoint point) {
     switch (oprType) {
-    case OPR_VIEW_ZOOM: {
-        CMapViewDoc* pDoc = GetDocument();
-        double level = 1.0;
-        if (zDelta > 0) {
-            // 缩小
-            level = 0.9;
-        } else if (zDelta < 0) {
-            // 放大
-            level = 1.1;
+        case OPR_VIEW_MOVE: {
+            didMoveBegin = false;
+            int dX = point.x - lastMovePoint.x;
+            int dY = point.y - lastMovePoint.y;
+            CMapViewDoc *pDoc = GetDocument();
+            pDoc->bound.displayLeft += dX;
+            pDoc->bound.displayBottom += dY;
+            pDoc->bound.displayRight += dX;
+            pDoc->bound.displayTop += dY;
+            Invalidate();
+            break;
         }
-        pDoc->bound.displayLeft   = pt.x + int((pDoc->bound.displayLeft   - pt.x) * level);
-        pDoc->bound.displayBottom = pt.y + int((pDoc->bound.displayBottom - pt.y) * level);
-        pDoc->bound.displayRight  = pt.x + int((pDoc->bound.displayRight  - pt.x) * level);
-        pDoc->bound.displayTop    = pt.y + int((pDoc->bound.displayTop    - pt.y) * level);
-        isDisplayDefault = false;
-        Invalidate();
-        break;
-    }
-    default:
-        break;
+        default:
+            break;
     }
 
+    CView::OnLButtonUp(nFlags, point);
+}
+
+void CMapViewView::OnMouseMove(UINT nFlags, CPoint point) {
+    switch (oprType) {
+        case OPR_VIEW_MOVE: {
+            if (didMoveBegin) {
+                isDisplayDefault = false;
+                int dX = point.x - lastMovePoint.x;
+                int dY = point.y - lastMovePoint.y;
+                lastMovePoint = point;
+                CMapViewDoc *pDoc = GetDocument();
+                pDoc->bound.displayLeft += dX;
+                pDoc->bound.displayBottom += dY;
+                pDoc->bound.displayRight += dX;
+                pDoc->bound.displayTop += dY;
+                Invalidate();
+                break;
+            }
+        }
+        default:
+            break;
+    }
+
+    CView::OnMouseMove(nFlags, point);
+}
+
+BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+    CMapViewDoc* pDoc = GetDocument();
+    double level = 1.0;
+    if (zDelta > 0) {
+        // 缩小
+        level = 0.9;
+    } else if (zDelta < 0) {
+        // 放大
+        level = 1.1;
+    }
+    pDoc->bound.displayLeft = pt.x + int((pDoc->bound.displayLeft - pt.x) * level);
+    pDoc->bound.displayBottom = pt.y + int((pDoc->bound.displayBottom - pt.y) * level);
+    pDoc->bound.displayRight = pt.x + int((pDoc->bound.displayRight - pt.x) * level);
+    pDoc->bound.displayTop = pt.y + int((pDoc->bound.displayTop - pt.y) * level);
+    isDisplayDefault = false;
+    Invalidate();
 
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
@@ -369,14 +427,16 @@ void CMapViewView::CancelOpr() {
     Invalidate();
 }
 
-void CMapViewView::OnViewZoom() {
-    CancelOpr();
-    oprType = OPR_VIEW_ZOOM;
-}
-
-
+// 视图-复原
 void CMapViewView::OnViewRestore() {
     CancelOpr();
     isDisplayDefault = true;
     Invalidate();
+}
+
+// 视图-移动
+void CMapViewView::OnViewMove() {
+    CancelOpr();
+    didMoveBegin = false;
+    oprType = OPR_VIEW_MOVE;
 }

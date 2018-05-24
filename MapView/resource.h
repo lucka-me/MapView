@@ -45,6 +45,8 @@
 #define ID_VIEW_ZOOM                    32790
 #define ID_32791                        32791
 #define ID_VIEW_RESTORE                 32792
+#define ID_32793                        32793
+#define ID_VIEW_MOVE                    32794
 #define ID_INDICATOR_PROGRESS           59142
 
 // Next default values for new objects
@@ -52,7 +54,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        319
-#define _APS_NEXT_COMMAND_VALUE         32793
+#define _APS_NEXT_COMMAND_VALUE         32795
 #define _APS_NEXT_CONTROL_VALUE         1021
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
