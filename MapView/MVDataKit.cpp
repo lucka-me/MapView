@@ -5,20 +5,20 @@
 // MARK: MapBound
 
 MapBound::MapBound() {
-        mapLeft = 0.0;   mapButtom = 0.0;   mapRight = 0.0;   mapTop = 0.0;
-    displayLeft = 0; displayButtom = 0; displayRight = 0; displayTop = 0;
+        mapLeft = 0.0;   mapBottom = 0.0;   mapRight = 0.0;   mapTop = 0.0;
+    displayLeft = 0; displayBottom = 0; displayRight = 0; displayTop = 0;
 }
 
-void MapBound::SetMap(double left, double buttom, double right, double top) {
+void MapBound::SetMap(double left, double bottom, double right, double top) {
     mapLeft   = left;
-    mapButtom = buttom;
+    mapBottom = bottom;
     mapRight  = right;
     mapTop    = top;
 }
 
-void MapBound::SetDisplay(int left, int buttom, int right, int top) {
+void MapBound::SetDisplay(int left, int bottom, int right, int top) {
     displayLeft   = left;
-    displayButtom = buttom;
+    displayBottom = bottom;
     displayRight  = right;
     displayTop    = top;
 }
@@ -28,7 +28,7 @@ double MapBound::MapWidth() {
 }
 
 double MapBound::MapHeight() {
-    return mapTop - mapButtom;
+    return mapTop - mapBottom;
 }
 
 CPoint MapBound::ConvertToDisplay(MFPoint point) {
@@ -37,7 +37,7 @@ CPoint MapBound::ConvertToDisplay(MFPoint point) {
 
 CPoint MapBound::ConvertToDisplay(double x, double y) {
     int displayX = int(round(displayLeft + (y - mapLeft) / (mapRight - mapLeft) * double(displayRight - displayLeft)));
-    int displayY = int(round(displayTop + (mapTop - x) / (mapTop - mapButtom) * double(displayButtom - displayTop)));
+    int displayY = int(round(displayTop + (mapTop - x) / (mapTop - mapBottom) * double(displayBottom - displayTop)));
     return CPoint(displayX, displayY);
 }
 
@@ -55,7 +55,7 @@ MFPoint * MapBound::ConvertToMap(CPoint point) {
 }
 
 MFPoint * MapBound::ConvertToMap(int x, int y) {
-    double mapX = mapButtom + double(displayButtom - y) / double(displayButtom - displayTop) * (mapTop - mapButtom);
+    double mapX = mapBottom + double(displayBottom - y) / double(displayBottom - displayTop) * (mapTop - mapBottom);
     double mapY = mapLeft + double(x - displayLeft) / double(displayRight - displayLeft) * (mapRight - mapLeft);
     return new MFPoint(mapX, mapY);
 }
@@ -94,7 +94,18 @@ void MFPoint::Draw(CDC & dc, MapBound & bound) {
 
 void MFPoint::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
     CPoint displayPoint = bound.ConvertToDisplay(x, y);
-    dc.SetPixel(displayPoint.x, displayPoint.y, drawStyle.lineColor);
+
+    CBrush brush;
+    brush.CreateSolidBrush(drawStyle.fillColor);
+    CGdiObject *pOldBrush = dc.SelectObject(&brush);
+    CPen pen;
+    pen.CreatePen(drawStyle.bottomPenStyle, drawStyle.bottomLineWidth, drawStyle.bottomLineColor);
+    CPen *pOldPen = dc.SelectObject(&pen);
+
+    dc.Ellipse(displayPoint.x - 2, displayPoint.y - 2, displayPoint.x + 2, displayPoint.y + 2);
+
+    dc.SelectObject(pOldPen);
+    dc.SelectObject(pOldBrush);
 }
 
 bool MFPoint::DidSelected(MFPoint & selectPoint, double buffer) {
@@ -121,14 +132,23 @@ void MFPolyline::Draw(CDC & dc, MapBound & bound) {
 }
 
 void MFPolyline::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
-    CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
-    CPen pen;
-    pen.CreatePen(drawStyle.penStyle, drawStyle.lineWidth, drawStyle.lineColor);
-    CPen *pOldPen = dc.SelectObject(&pen);
-
     CPoint * pList = bound.ConvertToDisplay(pointList);
+
+    CGdiObject *pOldBrush = dc.SelectStockObject(NULL_BRUSH);
+    CPen bottomPen;
+    bottomPen.CreatePen(drawStyle.bottomPenStyle, drawStyle.bottomLineWidth, drawStyle.bottomLineColor);
+    CPen *pOldPen = dc.SelectObject(&bottomPen);
+
+    dc.Polyline(pList, pointList.GetSize());
+    
+    CPen topPen;
+    topPen.CreatePen(drawStyle.topPenStyle, drawStyle.topLineWidth, drawStyle.topLineColor);
+    dc.SelectObject(&topPen);
+    //int drawMode = dc.SetROP2(R2_NOP);
+    
     dc.Polyline(pList, pointList.GetSize());
 
+    //dc.SetROP2(drawMode);
     dc.SelectObject(pOldPen);
     dc.SelectObject(pOldBrush);
 }
@@ -187,7 +207,7 @@ void MFPolygon::Draw(CDC & dc, MapBound & bound, MFStyle drawStyle) {
     brush.CreateSolidBrush(drawStyle.fillColor);
     CGdiObject *pOldBrush = dc.SelectObject(&brush);
     CPen pen;
-    pen.CreatePen(drawStyle.penStyle, drawStyle.lineWidth, drawStyle.lineColor);
+    pen.CreatePen(drawStyle.bottomPenStyle, drawStyle.bottomLineWidth, drawStyle.bottomLineColor);
     CPen *pOldPen = dc.SelectObject(&pen);
 
     CPoint * pList = bound.ConvertToDisplay(pointList);

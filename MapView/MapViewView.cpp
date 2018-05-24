@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CMapViewView, CView)
     ON_COMMAND(ID_RETRIEVE_ID, &CMapViewView::OnRetrieveId)
     ON_COMMAND(ID_VIEW_ZOOM, &CMapViewView::OnViewZoom)
     ON_WM_MOUSEWHEEL()
+    ON_COMMAND(ID_VIEW_RESTORE, &CMapViewView::OnViewRestore)
 END_MESSAGE_MAP()
 
 // CMapViewView 构造/析构
@@ -116,16 +117,16 @@ void CMapViewView::OnDraw(CDC* pDC)
     pen.CreatePen(PS_SOLID, 1, RGB(180, 180, 180));
     CPen *pOldPen = memDC.SelectObject(&pen);
     
-    double displayGridSize = double(pDoc->bound.displayButtom - pDoc->bound.displayTop) / pDoc->gridIndex.row;
+    double displayGridSize = double(pDoc->bound.displayBottom - pDoc->bound.displayTop) / pDoc->gridIndex.row;
     int gridRight = pDoc->bound.displayLeft + int(floor(pDoc->gridIndex.col * displayGridSize));
     for (int i = 0; i <= pDoc->gridIndex.row; i++) {
         memDC.MoveTo(pDoc->bound.displayLeft, pDoc->bound.displayTop + int(floor(i * displayGridSize)));
         memDC.LineTo(gridRight, pDoc->bound.displayTop + int(floor(i * displayGridSize)));
     }
-    int gridTop = pDoc->bound.displayButtom - int(floor(pDoc->gridIndex.row * displayGridSize));
+    int gridTop = pDoc->bound.displayBottom - int(floor(pDoc->gridIndex.row * displayGridSize));
     for (int i = pDoc->gridIndex.col; i >= 0; i--) {
         memDC.MoveTo(pDoc->bound.displayLeft + int(floor(i * displayGridSize)), gridTop);
-        memDC.LineTo(pDoc->bound.displayLeft + int(floor(i * displayGridSize)), pDoc->bound.displayButtom);
+        memDC.LineTo(pDoc->bound.displayLeft + int(floor(i * displayGridSize)), pDoc->bound.displayBottom);
     }
 
     memDC.SelectObject(pOldPen);
@@ -177,23 +178,25 @@ void CMapViewView::OnLButtonDown(UINT nFlags, CPoint point) {
 
     CMapViewDoc* pDoc = GetDocument();
     MFPoint * mapPoint = pDoc->bound.ConvertToMap(point);
-    int row = int((mapPoint->x - pDoc->bound.mapButtom) / pDoc->gridIndex.resolution);
+    int row = int((mapPoint->x - pDoc->bound.mapBottom) / pDoc->gridIndex.resolution);
     int col = int((mapPoint->y - pDoc->bound.mapLeft) / pDoc->gridIndex.resolution);
     if (row < 0 || row > pDoc->gridIndex.row ||
         col < 0 || col > pDoc->gridIndex.col)
         return;
 
     MFStyle style;
-    style.lineColor = RGB(255, 219, 79);
+    style.bottomLineColor = RGB(255, 219, 79);
     style.fillColor = RGB(254, 242, 99);
-    style.lineWidth = 2;
-    style.penStyle = PS_SOLID;
+    style.bottomLineWidth = 2;
+    style.bottomPenStyle = PS_SOLID;
 
     switch (oprType) {
         case OPR_RETRIEVE_CLICK_POINT: {
             for (int i = pDoc->gridIndex.index[row][col].GetSize() - 1; i >= 0; i--) {
                 if (pDoc->gridIndex.index[row][col][i]->GetType() == FT_POINT) {
                     if (pDoc->gridIndex.index[row][col][i]->DidSelected(*mapPoint)) {
+                        CClientDC dc(this);
+                        pDoc->gridIndex.index[row][col][i]->Draw(dc, pDoc->bound, style);
                         CString msg;
                         msg.Format(_T("序号：%d，分类ID：%d"), pDoc->gridIndex.index[row][col][i]->SN, pDoc->gridIndex.index[row][col][i]->id);
                         MessageBox(msg, _T("点击检索 - 点"), MB_OK);
@@ -255,7 +258,7 @@ BOOL CMapViewView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
             level = 1.1;
         }
         pDoc->bound.displayLeft   = pt.x + int((pDoc->bound.displayLeft   - pt.x) * level);
-        pDoc->bound.displayButtom = pt.y + int((pDoc->bound.displayButtom - pt.y) * level);
+        pDoc->bound.displayBottom = pt.y + int((pDoc->bound.displayBottom - pt.y) * level);
         pDoc->bound.displayRight  = pt.x + int((pDoc->bound.displayRight  - pt.x) * level);
         pDoc->bound.displayTop    = pt.y + int((pDoc->bound.displayTop    - pt.y) * level);
         isDisplayDefault = false;
@@ -341,10 +344,10 @@ void CMapViewView::OnRetrieveId() {
         FeatureArray & featureList = GetDocument()->featureList;
         CMapViewDoc* pDoc = GetDocument();
         MFStyle style;
-        style.lineColor = RGB(255, 219, 79);
+        style.bottomLineColor = RGB(255, 219, 79);
         style.fillColor = RGB(254, 242, 99);
-        style.lineWidth = 2;
-        style.penStyle = PS_SOLID;
+        style.bottomLineWidth = 2;
+        style.bottomPenStyle = PS_SOLID;
         CClientDC dc(this);
         int count = 0;
         for (int i = 0; i < featureList.GetSize(); i++) {
@@ -367,7 +370,13 @@ void CMapViewView::CancelOpr() {
 }
 
 void CMapViewView::OnViewZoom() {
-    // TODO: 在此添加命令处理程序代码
     CancelOpr();
     oprType = OPR_VIEW_ZOOM;
+}
+
+
+void CMapViewView::OnViewRestore() {
+    CancelOpr();
+    isDisplayDefault = true;
+    Invalidate();
 }

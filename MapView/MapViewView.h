@@ -68,6 +68,7 @@ public:
     afx_msg void OnRetrieveId();
     afx_msg void OnViewZoom();
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnViewRestore();
 };
 
 #ifndef _DEBUG  // MapViewView.cpp 中的调试版本

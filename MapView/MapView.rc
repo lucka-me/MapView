@@ -152,6 +152,7 @@ BEGIN
         END
         MENUITEM "×´Ì¬À¸(&S)",                     ID_VIEW_STATUS_BAR
         MENUITEM "Ëõ·Å",                          ID_VIEW_ZOOM
+        MENUITEM "¸´Ô­",                          ID_VIEW_RESTORE
     END
     POPUP "°ïÖú(&H)"
     BEGIN

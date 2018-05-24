@@ -27,8 +27,8 @@ public:
     // 方法
     MapBound();
     ~MapBound() {};
-    void SetMap(double left, double buttom, double right, double top);
-    void SetDisplay(int left, int buttom, int right, int top);
+    void SetMap(double left, double bottom, double right, double top);
+    void SetDisplay(int left, int bottom, int right, int top);
     double MapWidth();
     double MapHeight();
     CPoint ConvertToDisplay(MFPoint point);
@@ -38,17 +38,20 @@ public:
     MFPoint * ConvertToMap(int x, int y);    // 返回地图点的指针
 
     // 属性
-    double  mapLeft,     mapButtom,     mapRight,     mapTop;    // 数据的范围
-    int displayLeft, displayButtom, displayRight, displayTop;    // 显示的范围
+    double  mapLeft,     mapBottom,     mapRight,     mapTop;    // 数据的范围
+    int displayLeft, displayBottom, displayRight, displayTop;    // 显示的范围
 };
 
 // 要素样式
 class MFStyle {
 public:
-    COLORREF lineColor = RGB(0, 0, 0);
+    COLORREF topLineColor = RGB(0, 0, 0);
+    COLORREF bottomLineColor = RGB(0, 0, 0);
     COLORREF fillColor = RGB(255, 255, 255);
-    unsigned short lineWidth = 1;
-    int penStyle = PS_SOLID;
+    unsigned short topLineWidth = 1;
+    unsigned short bottomLineWidth = 1;
+    int topPenStyle = PS_SOLID;
+    int bottomPenStyle = PS_SOLID;
 };
 
 // 要素类数组

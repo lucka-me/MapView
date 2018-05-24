@@ -99,27 +99,39 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 } while (true);
                 switch (featureID) {
                     case 10000: {   // 图廓
-                        newPolyline->style.lineColor = RGB(0, 0, 0);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineColor = RGB(0, 0, 0);
+                        newPolyline->style.topLineColor = RGB(0, 0, 0);
+                        newPolyline->style.bottomLineWidth = 1;
+                        newPolyline->style.topLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
+                        newPolyline->style.topPenStyle = PS_SOLID;
                         break;
                     }
                     case 10001: {   // 铁路
-                        newPolyline->style.lineColor = RGB(0, 0, 0);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineColor = RGB(56, 60, 60);
+                        newPolyline->style.topLineColor = RGB(56, 60, 60);
+                        newPolyline->style.bottomLineWidth = 3;
+                        newPolyline->style.topLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
+                        newPolyline->style.topPenStyle = PS_DASH;
                         break;
                     }
                     case 10003: {   // 汽渡
-                        newPolyline->style.lineColor = RGB(72, 92, 194);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_DASH;
+                        newPolyline->style.bottomLineColor = RGB(72, 92, 194);
+                        newPolyline->style.topLineColor = RGB(72, 92, 194);
+                        newPolyline->style.bottomLineWidth = 1;
+                        newPolyline->style.topLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_DASH;
+                        newPolyline->style.topPenStyle = PS_DASH;
                         break;
                     }
                     case 10004: {   // 主要道路
-                        newPolyline->style.lineColor = RGB(255, 0, 0);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineColor = RGB(167, 56, 54);
+                        newPolyline->style.topLineColor = RGB(230, 0, 51);
+                        newPolyline->style.bottomLineWidth = 4;
+                        newPolyline->style.topLineWidth = 2;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
+                        newPolyline->style.topPenStyle = PS_SOLID;
                         break;
                     }
                     default:
@@ -144,24 +156,24 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 } while (true);
                 switch (featureID) {
                     case 20002: {   // 铁路中转站
-                        newPolyline->style.lineColor = RGB(148, 147, 145);
+                        newPolyline->style.bottomLineColor = RGB(148, 147, 145);
                         newPolyline->style.fillColor = RGB(171, 169, 164);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
                         break;
                     }
                     case 20003: {   // 河流、湖泊
-                        newPolyline->style.lineColor = RGB(83, 143, 189);
+                        newPolyline->style.bottomLineColor = RGB(83, 143, 189);
                         newPolyline->style.fillColor = RGB(102, 189, 204);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
                         break;
                     }
                     case 20004: {   // 居民地
-                        newPolyline->style.lineColor = RGB(0, 103, 167);
+                        newPolyline->style.bottomLineColor = RGB(0, 103, 167);
                         newPolyline->style.fillColor = RGB(168, 185, 189);
-                        newPolyline->style.lineWidth = 1;
-                        newPolyline->style.penStyle = PS_SOLID;
+                        newPolyline->style.bottomLineWidth = 1;
+                        newPolyline->style.bottomPenStyle = PS_SOLID;
                         break;
                     }
                     default:
@@ -170,12 +182,13 @@ BOOL CMapViewDoc::OnOpenDocument(LPCTSTR lpszPathName) {
                 featureList.Add(newPolyline);
                 break;
             }
-            case 30000: {
+            case 30000: {   // 控制点
                 double x, y;
                 file.ReadString(line);
                 decoder.Decode(line, x, y);
                 MFPoint * point = new MFPoint(x, y, featureID, SN);
-                point->style.lineColor = RGB(0, 0, 255);
+                point->style.bottomLineColor = RGB(230, 0, 51);
+                point->style.fillColor = RGB(201, 23, 30);
                 featureList.Add(point);
                 controlPointList.Add(point);
                 file.ReadString(line);
@@ -330,8 +343,8 @@ bool CMapViewDoc::DoAffine() {
     pFrame->m_wndStatusBar.SetPaneProgress(1, 0, TRUE);
     pFrame->m_wndStatusBar.SetPaneText(0, _T("确定图幅中"));
 
-    double left, buttom, right, top;
-    buttom = controlPointList[0]->x;
+    double left, bottom, right, top;
+    bottom = controlPointList[0]->x;
     top    = controlPointList[0]->x;
     left   = controlPointList[0]->y;
     right  = controlPointList[0]->y;
@@ -339,7 +352,7 @@ bool CMapViewDoc::DoAffine() {
         switch (featureList[i]->GetType()) {
             case FT_POINT: {
                 MFPoint * point = (MFPoint *)featureList[i];
-                buttom = point->x < buttom ? point->x : buttom;
+                bottom = point->x < bottom ? point->x : bottom;
                 top    = point->x >    top ? point->x : top;
                 left   = point->y <   left ? point->y : left;
                 right  = point->y >  right ? point->y : right;
@@ -349,7 +362,7 @@ bool CMapViewDoc::DoAffine() {
                 MFPolyline * polyline = (MFPolyline *)featureList[i];
                 for (int j = 0; j < polyline->pointList.GetSize(); j++) {
                     MFPoint * point = (MFPoint *)polyline->pointList[j];
-                    buttom = point->x < buttom ? point->x : buttom;
+                    bottom = point->x < bottom ? point->x : bottom;
                     top    = point->x >    top ? point->x : top;
                     left   = point->y <   left ? point->y : left;
                     right  = point->y >  right ? point->y : right;
@@ -360,7 +373,7 @@ bool CMapViewDoc::DoAffine() {
                 MFPolygon * polygon = (MFPolygon *)featureList[i];
                 for (int j = 0; j < polygon->pointList.GetSize(); j++) {
                     MFPoint * point = (MFPoint *)polygon->pointList[j];
-                    buttom = point->x < buttom ? point->x : buttom;
+                    bottom = point->x < bottom ? point->x : bottom;
                     top    = point->x >    top ? point->x : top;
                     left   = point->y <   left ? point->y : left;
                     right  = point->y >  right ? point->y : right;
@@ -372,7 +385,7 @@ bool CMapViewDoc::DoAffine() {
         }
         pFrame->m_wndStatusBar.SetPaneProgress(1, i, TRUE);
     }
-    bound.SetMap(left, buttom, right, top);
+    bound.SetMap(left, bottom, right, top);
     
     return true;
 }
@@ -398,7 +411,7 @@ bool CMapViewDoc::DoBuildIndex() {
         switch (featureList[i]->GetType()) {
             case FT_POINT: {
                 MFPoint * point = (MFPoint *)featureList[i];
-                int row = int((point->x - bound.mapButtom) / gridIndex.resolution);
+                int row = int((point->x - bound.mapBottom) / gridIndex.resolution);
                 int col = int((point->y - bound.mapLeft)   / gridIndex.resolution);
                 gridIndex.index[row][col].Add(point);
                 break;
@@ -414,9 +427,9 @@ bool CMapViewDoc::DoBuildIndex() {
                     double right  = pointA->y > pointB->y ? pointA->y : pointB->y;
                     double top    = pointA->x > pointB->x ? pointA->x : pointB->x;
                     int leftCol   = int((left   - bound.mapLeft)   / gridIndex.resolution);
-                    int bottomRow = int((bottom - bound.mapButtom) / gridIndex.resolution);
+                    int bottomRow = int((bottom - bound.mapBottom) / gridIndex.resolution);
                     int rightCol  = int((right  - bound.mapLeft)   / gridIndex.resolution);
-                    int topRow    = int((top    - bound.mapButtom) / gridIndex.resolution);
+                    int topRow    = int((top    - bound.mapBottom) / gridIndex.resolution);
                     for (int scanRow = bottomRow; scanRow <= topRow; scanRow++)
                         for (int scanCol = leftCol; scanCol <= rightCol; scanCol++)
                             if (!gridIndex.index[scanRow][scanCol].Has(polyline))
@@ -440,9 +453,9 @@ bool CMapViewDoc::DoBuildIndex() {
                     top    = point->x > top    ? point->x : top;
                 }
                 int leftCol   = int((left   - bound.mapLeft)   / gridIndex.resolution);
-                int bottomRow = int((bottom - bound.mapButtom) / gridIndex.resolution);
+                int bottomRow = int((bottom - bound.mapBottom) / gridIndex.resolution);
                 int rightCol  = int((right  - bound.mapLeft)   / gridIndex.resolution);
-                int topRow    = int((top    - bound.mapButtom) / gridIndex.resolution);
+                int topRow    = int((top    - bound.mapBottom) / gridIndex.resolution);
                 for (int scanRow = bottomRow; scanRow <= topRow; scanRow++)
                     for (int scanCol = leftCol; scanCol <= rightCol; scanCol++)
                         gridIndex.index[scanRow][scanCol].Add(polygon);
